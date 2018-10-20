@@ -18,7 +18,7 @@ module.exports.models = {
   migrate: 'safe',
 
   attributes: {
-    id: { type: 'number', autoIncrement: true, },
+    //id: { type: 'number', autoIncrement: true, },
   },
 
   dataEncryptionKeys: {
