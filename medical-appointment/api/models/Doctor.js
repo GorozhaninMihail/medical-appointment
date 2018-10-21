@@ -1,30 +1,31 @@
 /**
- * MedicalCentre.js
+ * Doctor.js
  *
  * @description :: A model definition.  Represents a database table/collection/etc.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
 module.exports = {
-  tableName: 'medical_centres',
+  tableName: 'doctors',
   primaryKey: 'id',
+
   attributes: {
+
     id: {
+      columnName: 'doctor_id',
       type: 'number',
-      unique: true,
       autoIncrement: true
     },
-    name: {
-      type: 'string',
-      required: true
+    speciality: {
+      type: 'number',
+      columnName: 'speciality_id'
     },
-    description: {
+    experience: {
+      type: 'number'
+    },
+    information: {
       type: 'string',
       allowNull: true
-    },
-    address: {
-      type: 'string',
-      required: true
     }
 
   },

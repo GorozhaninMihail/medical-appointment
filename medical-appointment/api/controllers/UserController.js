@@ -9,6 +9,15 @@ module.exports = {
   all_users: async function(req, res) {
     let userList = await User.find();
     return res.json(userList);
+  },
+
+  find_users_by_name: async function(req, res) {
+    let userList = await User.find({
+      name: {
+        contains: req.param('name', '')
+      }
+    });
+    return res.json(userList);
   }
 };
 

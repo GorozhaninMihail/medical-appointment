@@ -12,7 +12,7 @@ module.exports = {
     id: {
       type: 'number',
       unique: true,
-      columnName: 'userID',
+      columnName: 'user_id',
       autoIncrement: true
     },
     last_name: {
@@ -41,10 +41,14 @@ module.exports = {
     },
     type: {
       type: 'string',
-      required: true
+      required: true,
+      isIn: ['user', 'doctor', 'admin']
     }
 
   },
 
+  getFullName: function() {
+    return this.last_name + " " + this.first_name[0] + "." + this.middle_name[0] + ".";
+  }
 };
 
