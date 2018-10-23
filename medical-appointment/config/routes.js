@@ -17,5 +17,6 @@ module.exports.routes = {
   'GET /users/all': 'UserController.all_users',
   //'GET /users/:name': 'UserController.find_users_by_name',
   'GET /doctors/all': 'DoctorController.all_doctors',
+  'GET /doctors/:doctor_id': 'DoctorController.doctor_info',
   'GET /doctors/': 'DoctorController.find_doctors'
 };
