@@ -13,7 +13,10 @@ module.exports.routes = {
   '/': {
     view: 'pages/homepage'
   },
-  'GET /mc/all': 'MedicalCentreController.all_centres',
+
+  'GET /clinics': 'MedicalCentreController.all_clinics',
+  'POST /clinics': 'MedicalCentreController.add_new_clinic',
+
   'GET /users/all': 'UserController.all_users',
   //'GET /users/:name': 'UserController.find_users_by_name',
   'GET /doctors/all': 'DoctorController.all_doctors',
