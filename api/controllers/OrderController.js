@@ -86,6 +86,26 @@ module.exports = {
       return res.notFound('This time is not owned by you');
 
     return res.ok();
+  },
+
+  order_list: async function(req, res) {
+    let user_id = req.param('user');
+    if(user_id === undefined) return res.badRequest("Param 'user' is undefined");
+    // Проверка что есть права
+
+    let user = await User.find({id: user_id});
+    if(user.length === 0) return res.notFound('User with ID ' + user_id + ' is not found.');
+
+    let SELECT_QUERY = `SELECT orders.date, orders.time, orders.status, mc.name AS mc_name, mc.address, specialities.name, users.last_name, users.first_name, users.middle_name 
+      FROM orders 
+      LEFT JOIN medical_centres mc ON mc.id = orders.mc_id
+      LEFT JOIN doctors ON doctors.doctor_id = orders.doctor_id
+      JOIN users ON users.user_id = doctors.doctor_id
+      LEFT JOIN specialities ON specialities.speciality_id = doctors.speciality_id
+      WHERE orders.patient_id = $1 
+      ORDER BY orders.date DESC, orders.time DESC`;
+    let orders = await sails.sendNativeQuery(SELECT_QUERY, [user_id]);
+    return res.json(orders.rows);
   }
 
 };

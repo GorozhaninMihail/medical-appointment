@@ -19,7 +19,12 @@ module.exports.routes = {
   'GET /doctors/all': 'DoctorController.all_doctors',
   'GET /doctors/:doctor_id': 'DoctorController.doctor_info',
   'GET /doctors/': 'DoctorController.find_doctors',
+
+
   'PUT /order': 'OrderController.make_order',
   'DELETE /order': 'OrderController.cancel_order',
-  'POST /order': 'OrderController.change_status_order'
+  'POST /order': 'OrderController.change_status_order',
+  'GET /orders': 'OrderController.order_list',
+
+  'PUT /online': 'OnlineController.add_question'
 };
