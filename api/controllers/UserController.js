@@ -6,13 +6,13 @@
  */
 
 module.exports = {
-  all_users: async function(req, res) {
-    let userList = await User.find();
+  async allUsers(req, res) {
+    const userList = await User.find();
     return res.json(userList);
   },
 
-  find_users_by_name: async function(req, res) {
-    let userList = await User.find({
+  async userByName(req, res) {
+    const userList = await User.find({
       name: {
         contains: req.param('name', '')
       }
@@ -20,4 +20,3 @@ module.exports = {
     return res.json(userList);
   }
 };
-
