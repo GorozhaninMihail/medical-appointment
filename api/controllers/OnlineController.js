@@ -8,11 +8,8 @@
 module.exports = {
   add_question: async function(req, res) {
     let body = req.body;
-    if(body.user_id === undefined) return res.badRequest("Param 'user_id' is undefined");
-    //if(body.doctor_id === undefined) return res.badRequest("Param 'doctor_id' is undefined");
-    //if(body.specialist_id === undefined) return res.badRequest("Param 'specialist_id' is undefined");
-    if(body.title === undefined) return res.badRequest("Param 'title' is undefined");
-    if(body.text === undefined) return res.badRequest("Param 'text' is undefined");
+    let result = sails.helpers.parametersCheck(req, ['user_id', 'title', 'text']);
+    if(result.error) return res.badRequest(result.error);
 
     let user = await User.find({id: body.user_id});
     if(user.length === 0) return res.notFound('User with ID ' + body.user_id + ' is not found.');

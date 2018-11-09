@@ -13,9 +13,8 @@ module.exports = {
 
   add_new_clinic: async function(req, res) {
     let body = req.body;
-    sails.helpers.parametersCheck(req, ['name', 'address']).tolerate((err) => {
-      return res.badRequest(err.raw);
-    });
+    let result = sails.helpers.parametersCheck(req, ['name', 'address']);
+    if(result.error) return res.badRequest(result.error);
 
     let CREATE_CLINIC_QUERY = `
       INSERT INTO medical_centres (name, description, address) VALUES ($1, $2, $3)

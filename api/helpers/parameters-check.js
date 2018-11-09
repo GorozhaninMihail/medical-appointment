@@ -3,7 +3,6 @@ module.exports = {
   friendlyName: 'Parameters check',
   description: 'Check if parameters exist',
   sync: true,
-
   inputs: {
     req: {
       type: 'ref',
@@ -20,11 +19,12 @@ module.exports = {
   },
 
   fn: function (inputs, exits) {
-    inputs.params.forEach(function(value) {
-      if(inputs.req.body[value] === undefined)
-        return exits.error("Param '" + value + "' is undefined");
-    });
-    return exits.success();
+    for (let i = 0; i < inputs.params.length; i++) {
+      if(!inputs.req.body[inputs.params[i]]) {
+        return exits.success({error: "Param '" + inputs.params[i] + "' is undefined"});
+      }
+    }
+    return exits.success({error:null});
 
   }
 
