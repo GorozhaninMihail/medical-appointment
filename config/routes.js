@@ -19,9 +19,9 @@ module.exports.routes = {
 
   'GET /users/all': 'UserController.all_users',
   //'GET /users/:name': 'UserController.find_users_by_name',
-  'GET /doctors/all': 'DoctorController.all_doctors',
-  'GET /doctors/:doctor_id': 'DoctorController.doctor_info',
-  'GET /doctors/': 'DoctorController.find_doctors',
+  'GET /doctors/all': 'DoctorController.allDoctors',
+  'GET /doctors/:doctor_id': 'DoctorController.doctorInfo',
+  'GET /doctors/': 'DoctorController.findDoctors',
 
 
   'PUT /order': 'OrderController.make_order',
@@ -29,5 +29,7 @@ module.exports.routes = {
   'POST /order': 'OrderController.change_status_order',
   'GET /orders': 'OrderController.order_list',
 
-  'PUT /online': 'OnlineController.add_question'
+  'POST /online': 'OnlineController.addQuestion',
+  'GET /online': 'OnlineController.getQuestions',
+  'DELETE /online/:id': 'OnlineController.closeQuestion'
 };

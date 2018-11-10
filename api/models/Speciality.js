@@ -7,6 +7,7 @@
 
 module.exports = {
   tableName: 'specialities',
+  primaryKey: 'id',
   attributes: {
     id: {
       type: 'number',
