@@ -31,5 +31,7 @@ module.exports.routes = {
 
   'POST /online': 'OnlineController.addQuestion',
   'GET /online': 'OnlineController.getQuestions',
+  'GET /online/:id': 'OnlineController.getQuestionInfo',
+  'PUT /online/:id': 'OnlineController.addAnswer',
   'DELETE /online/:id': 'OnlineController.closeQuestion'
 };
