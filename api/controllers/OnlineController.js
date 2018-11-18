@@ -102,9 +102,6 @@ module.exports = {
 
     questionInfo.question = (await sails.sendNativeQuery(SELECT_QUESTION, [questionID])).rows[0];
     questionInfo.messaged = (await sails.sendNativeQuery(SELECT_MESSAGES, [questionID])).rows;
-
-    console.log(questionInfo);
-
     return res.json(questionInfo);
   }
 

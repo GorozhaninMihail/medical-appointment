@@ -14,8 +14,10 @@ module.exports.routes = {
     view: 'pages/homepage'
   },
 
-  'GET /clinics': 'MedicalCentreController.all_clinics',
-  'POST /clinics': 'MedicalCentreController.add_new_clinic',
+  'GET /clinics': 'MedicalCentreController.allClinics',
+  'GET /clinics/:id': 'MedicalCentreController.getClinicById',
+  'POST /clinics': 'MedicalCentreController.addNewClinic',
+  'PUT /clinics/:id': 'MedicalCentreController.updateClinicInfo',
 
   'GET /users/all': 'UserController.all_users',
   //'GET /users/:name': 'UserController.find_users_by_name',
@@ -24,10 +26,10 @@ module.exports.routes = {
   'GET /doctors/': 'DoctorController.findDoctors',
 
 
-  'PUT /order': 'OrderController.make_order',
-  'DELETE /order': 'OrderController.cancel_order',
-  'POST /order': 'OrderController.change_status_order',
-  'GET /orders': 'OrderController.order_list',
+  'PUT /order': 'OrderController.makeOrder',
+  'DELETE /order': 'OrderController.cancelOrder',
+  'POST /order': 'OrderController.changeStatusOrder',
+  'GET /orders': 'OrderController.orderList',
 
   'POST /online': 'OnlineController.addQuestion',
   'GET /online': 'OnlineController.getQuestions',

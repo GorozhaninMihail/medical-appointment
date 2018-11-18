@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  make_order: async function(req, res) {
+  makeOrder: async function(req, res) {
     let body = req.body;
     if(body.mc_id === undefined) return res.badRequest("Param 'mc_id' is undefined");
     if(body.user_id === undefined) return res.badRequest("Param 'user_id' is undefined");
@@ -37,7 +37,7 @@ module.exports = {
     return res.ok();
   },
 
-  cancel_order: async function(req, res) {
+  cancelOrder: async function(req, res) {
     let body = req.body;
     if(body.mc_id === undefined) return res.badRequest("Param 'mc_id' is undefined");
     if(body.user_id === undefined) return res.badRequest("Param 'user_id' is undefined");
@@ -62,7 +62,7 @@ module.exports = {
     return res.ok();
   },
 
-  change_status_order: async function(req, res) {
+  changeStatusOrder: async function(req, res) {
     let body = req.body;
     if(body.mc_id === undefined) return res.badRequest("Param 'mc_id' is undefined");
     if(body.user_id === undefined) return res.badRequest("Param 'user_id' is undefined");
@@ -88,7 +88,7 @@ module.exports = {
     return res.ok();
   },
 
-  order_list: async function(req, res) {
+  orderList: async function(req, res) {
     let user_id = req.param('user');
     if(user_id === undefined) return res.badRequest("Param 'user' is undefined");
     // Проверка что есть права
