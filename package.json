@@ -17,10 +17,13 @@
     "sails-postgresql": "1.0.1"
   },
   "devDependencies": {
-    "@sailshq/eslint": "^4.19.3"
+    "@sailshq/eslint": "^4.19.3",
+    "cross-env": "^5.2.0",
+    "nodemon": "^1.18.7"
   },
   "scripts": {
-    "start": "NODE_ENV=production node app.js",
+    "start": "cross-env NODE_ENV=production node app",
+    "dev": "nodemon app",
     "test": "npm run lint && npm run custom-tests && echo 'Done.'",
     "lint": "eslint . --max-warnings=0 --report-unused-disable-directives && echo '✔  Your .js files look good.'",
     "custom-tests": "echo \"(No other custom tests yet.)\" && echo"

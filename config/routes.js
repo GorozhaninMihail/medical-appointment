@@ -9,31 +9,29 @@
  */
 
 module.exports.routes = {
+  // 'POST /api/v1/login': '',
+  // 'POST /api/v1/signup': '',
+  // 'POST /api/v1/logout': '',
 
-  '/': {
-    view: 'pages/homepage'
-  },
+  'GET /api/v1/clinics': 'MedicalCentreController.allClinics',
+  'GET /api/v1/clinics/:id': 'MedicalCentreController.getClinicById',
+  'POST /api/v1/clinics': 'MedicalCentreController.addNewClinic',
+  'PUT /api/v1/clinics/:id': 'MedicalCentreController.updateClinicInfo',
 
-  'GET /clinics': 'MedicalCentreController.allClinics',
-  'GET /clinics/:id': 'MedicalCentreController.getClinicById',
-  'POST /clinics': 'MedicalCentreController.addNewClinic',
-  'PUT /clinics/:id': 'MedicalCentreController.updateClinicInfo',
-
-  'GET /users/all': 'UserController.all_users',
+  'GET /api/v1/users/all': 'UserController.allUsers',
   //'GET /users/:name': 'UserController.find_users_by_name',
-  'GET /doctors/all': 'DoctorController.allDoctors',
-  'GET /doctors/:doctor_id': 'DoctorController.doctorInfo',
-  'GET /doctors/': 'DoctorController.findDoctors',
+  'GET /api/v1/doctors/all': 'DoctorController.allDoctors',
+  'GET /api/v1/doctors/:doctor_id': 'DoctorController.doctorInfo',
+  'GET /api/v1/doctors/': 'DoctorController.findDoctors',
 
+  'PUT /api/v1/order': 'OrderController.makeOrder',
+  'DELETE /api/v1/order': 'OrderController.cancelOrder',
+  'POST /api/v1/order': 'OrderController.changeStatusOrder',
+  'GET /api/v1/orders': 'OrderController.orderList',
 
-  'PUT /order': 'OrderController.makeOrder',
-  'DELETE /order': 'OrderController.cancelOrder',
-  'POST /order': 'OrderController.changeStatusOrder',
-  'GET /orders': 'OrderController.orderList',
-
-  'POST /online': 'OnlineController.addQuestion',
-  'GET /online': 'OnlineController.getQuestions',
-  'GET /online/:id': 'OnlineController.getQuestionInfo',
-  'PUT /online/:id': 'OnlineController.addAnswer',
-  'DELETE /online/:id': 'OnlineController.closeQuestion'
+  'POST /api/v1/online': 'OnlineController.addQuestion',
+  'GET /api/v1/online': 'OnlineController.getQuestions',
+  'GET /api/v1/online/:id': 'OnlineController.getQuestionInfo',
+  'PUT /api/v1/online/:id': 'OnlineController.addAnswer',
+  'DELETE /api/v1/online/:id': 'OnlineController.closeQuestion'
 };
