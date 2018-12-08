@@ -10,25 +10,24 @@ module.exports = {
   primaryKey: 'id',
 
   attributes: {
-
     id: {
       columnName: 'doctor_id',
       type: 'number',
-      autoIncrement: true
+      autoIncrement: true,
     },
+
     speciality: {
       type: 'number',
-      columnName: 'speciality_id'
+      columnName: 'speciality_id',
     },
+
     experience: {
-      type: 'number'
+      type: 'number',
     },
+
     information: {
       type: 'string',
-      allowNull: true
-    }
-
+      allowNull: true,
+    },
   },
-
 };
-

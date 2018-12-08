@@ -10,40 +10,39 @@ module.exports = {
   primaryKey: 'id',
 
   attributes: {
-
     id: {
       columnName: 'consultation_id',
       type: 'number',
-      autoIncrement: true
+      autoIncrement: true,
     },
+
     userID: {
       columnName: 'user_id',
       type: 'number',
     },
+
     doctorID: {
       columnName: 'doctor_id',
       type: 'number',
-      allowNull: true
+      allowNull: true,
     },
+
     specialityID: {
       type: 'number',
       columnName: 'specialist_id',
-      allowNull: true
+      allowNull: true,
     },
+
     title: {
-      type: 'string'
+      type: 'string',
     },
+
     text: {
-      type: 'string'
+      type: 'string',
     },
+
     completed: {
-      type: 'boolean'
-    }/*,
-    time: {
-      type: 'string'
-    }*/
-
+      type: 'boolean',
+    },
   },
-
 };
-

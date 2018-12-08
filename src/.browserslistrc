@@ -1,0 +1,7 @@
+# Run npx browserslist in project directory to see what browsers was selected
+# by your queries (from within the "src" folder!)
+
+>0.2%
+last 3 versions
+Firefox ESR
+not dead

@@ -13,13 +13,11 @@
  * https://sailsjs.com/config/datastores
  */
 
+const sailsPostgresqlAdapter = require('sails-postgresql');
+
 module.exports.datastores = {
-
-
   default: {
-    adapter: require('sails-postgresql'),
+    adapter: sailsPostgresqlAdapter,
     url: 'postgresql://srv155907_unn52:SuperMed@pgsql-155907.srv.hoster.ru:5432/srv155907_medapp',
   },
-
-
 };

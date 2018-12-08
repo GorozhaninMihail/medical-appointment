@@ -8,26 +8,27 @@
 module.exports = {
   tableName: 'medical_centres',
   primaryKey: 'id',
+
   attributes: {
     id: {
       type: 'number',
       unique: true,
-      autoIncrement: true
+      autoIncrement: true,
     },
+
     name: {
       type: 'string',
-      required: true
+      required: true,
     },
+
     description: {
       type: 'string',
-      allowNull: true
+      allowNull: true,
     },
+
     address: {
       type: 'string',
-      required: true
-    }
-
+      required: true,
+    },
   },
-
 };
-

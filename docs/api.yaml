@@ -1,0 +1,254 @@
+openapi: 3.0.0
+info:
+  title: Medical appointment service
+  description: Medical appointment service API.
+  version: "0.0.1"
+paths:
+  /clinics:
+    get:
+      summary: Returns a list of clinics.
+      tags:
+        - clinics
+      responses:
+        '200':
+          description: A list of clinics.
+    post:
+      summary: Adds a clinic.
+      tags:
+        - clinics
+      responses:
+        '201':
+          description: Clinic has been created.
+        '400':
+          description: Validation failed.
+  /clinics/{clinicId}:
+    parameters:
+      - in: path
+        name: clinicId
+        required: true
+        description: Clinic ID
+        schema:
+          type: integer
+    get:
+      summary: Returns clinic info.
+      tags:
+        - clinics
+      responses:
+        '200':
+          description: Clinic info.
+        '404':
+          description: Clinic not found
+    put:
+      summary: Updates clinic info.
+      tags:
+        - clinics
+      responses:
+        '200':
+          description: Clinic info updated.
+        '400':
+          description: Validation failed.
+        '404':
+          description: Clinic not found
+    delete:
+      summary: Deletes clinic.
+      tags:
+        - clinics
+      responses:
+        '200':
+          description: Clinic deleted.
+        '404':
+          description: Clinic not found
+  /users:
+    get:
+      summary: Returns a list of users available for the current user (for example, regular users can only see a list of doctors). Admins can see all users.
+      tags:
+        - users
+      responses:
+        '200':
+          description: A list of users.
+    post:
+      summary: Adds a doctor or a manager. Used by admins only.
+      tags:
+        - users
+      responses:
+        '201':
+          description: Profile created.
+        '400':
+          description: Validation failed.
+  /users/{userId}:
+    parameters:
+      - in: path
+        name: userId
+        required: true
+        description: User ID
+        schema:
+          type: integer
+    get:
+      summary: Returns user's info.
+      tags:
+        - users
+      responses:
+        '200':
+          description: User's info.
+        '404':
+          description: User does not exist OR cannot be visible by the current user.
+    put:
+      summary: Changes user's info.
+      tags:
+        - users
+      responses:
+        '200':
+          description: Changes has been made.
+        '400':
+          description: Validation failed.
+        '404':
+          description: User does not exist OR cannot be visible by the current user.
+    delete:
+      summary: Deletes user's profile. Users can delete only their own profiles.
+      tags:
+        - users
+      responses:
+        '200':
+          description: User deleted.
+        '404':
+          description: User does not exist OR cannot be visible by the current user.
+  /schedule/{doctorId}:
+    parameters:
+      - in: path
+        name: doctorId
+        required: true
+        description: User ID. User must be a doctor.
+        schema:
+          type: integer
+    get:
+      summary: Returns doctor's schedule.
+      tags:
+        - schedule
+      responses:
+        '200':
+          description: Doctor's schedule.
+        '404':
+          description: Doctor not found or they don't have schedule yet or this is not a doctor.
+    post:
+      summary: (managers/admins) Creates a schedule for a doctor.
+      tags:
+        - schedule
+      responses:
+        '201':
+          description: Doctor's schedule created.
+        '400':
+          description: Validation failed.
+        '404':
+          description: Doctor not found or this is not a doctor.
+    put:
+      summary: (managers/admins) Updates doctor's schedule.
+      tags:
+        - schedule
+      responses:
+        '200':
+          description: Doctor's schedule updated.
+        '404':
+          description: Doctor not found or this is not a doctor.
+  /specialities:
+    get:
+      summary: Returns doctor's specialities.
+      tags:
+        - specialities
+      responses:
+        '200':
+          description: Doctor's specialities.
+    post:
+      summary: (admins) Adds doctor's speciality.
+      tags:
+        - specialities
+      responses:
+        '201':
+          description: Speciality added.
+        '400':
+          description: Validation failed.
+  /specialities/{catId}:
+    parameters:
+    - in: path
+      name: catId
+      required: true
+      description: Category ID.
+      schema:
+        type: integer
+    put:
+      summary: (admins) Edits doctor's speciality.
+      tags:
+        - specialities
+      responses:
+        '200':
+          description: Speciality changed.
+        '400':
+          description: Validation failed.
+        '404':
+          description: There is no such a speciality or access denied.
+    delete:
+      summary: (admins) Removes doctor's speciality.
+      tags:
+        - specialities
+      responses:
+        '200':
+          description: Speciality removed.
+        '404':
+          description: There is no such a speciality or access denied.
+  /consultations:
+    get:
+      summary: Returns consultations for the current user. Returns all consultations for managers/admins.
+      tags:
+        - consultations
+      responses:
+        '200':
+          description: Doctor's specialities.
+        '401':
+          description: User unauthorized.
+    post:
+      summary: (users) Registers new consultation.
+      tags:
+        - consultations
+      responses:
+        '201':
+          description: Consultation registered.
+        '400':
+          description: Validation failed.
+        '401':
+          description: User unauthorized.
+  /consultations/{consultId}:
+    parameters:
+      - in: path
+        name: consultId
+        required: true
+        description: Consultation ID.
+        schema:
+          type: integer
+    get:
+      summary: Returns consultation's info.
+      tags:
+        - consultations
+      responses:
+        '200':
+          description: Consultation's info.
+        '404':
+          description: Consultation does not exist or access denied.
+    put:
+      summary: (doctors, admins) Changes consultation's status.
+      tags:
+        - consultations
+      responses:
+        '200':
+          description: Changes has been applied.
+        '400':
+          description: Validation failed.
+        '404':
+          description: Consultation does not exist or access denied.
+    delete:
+      summary: Deletes (doctors, admins)/cancels (users) consultation.
+      tags:
+        - consultations
+      responses:
+        '200':
+          description: Operation was successful.
+        '404':
+          description: Consultation does not exist or cancelled or access denied.

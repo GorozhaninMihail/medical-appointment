@@ -1,0 +1,132 @@
+<mat-card
+  fxLayout="column"
+  fxLayoutAlign="center"
+  class="mat-card_type_main"
+>
+  <div class="container">
+    <h1 class="mat-display-1">SuperMed</h1>
+    <h2>
+      Инновационная сеть клиник, работающая на рынке медицинских услуг Нижнего Новгорода с 2018 года
+    </h2>
+    <p>
+      <a href="#appointment-form" mat-raised-button color="accent">Записаться на приём</a>
+    </p>
+  </div>
+</mat-card>
+
+<section
+  class="container"
+  id="appointment-form"
+>
+  <div class="section">
+    <h1>Запись на приём</h1>
+    <p>Для того, чтобы записаться на приём к интересующему вас специалисту выберите направление, филиал медицинского учреждения или непосредственно специалиста. Также вы должны быть зарегистрированы в нашей системе.</p>
+    <mat-card>
+      <mat-card-content>
+        Используйте кнопки ниже для того, чтобы зарегистрироваться или войти в систему. Это важно, поскольку нам нужно подтвердить вашу личность и проверить, действительно хотите воспользоваться нашими услугами.
+      </mat-card-content>
+      <mat-card-actions>
+        <a
+          routerLink="auth"
+          mat-raised-button
+          color="primary"
+        >Зарегистрироваться</a>
+
+        <a
+          routerLink="auth"
+          mat-button
+          color="primary"
+        >Войти</a>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</section>
+
+<div class="container">
+  <section class="section">
+    <h1>Специалиста в какой области вы ищите?</h1>
+    <p>Просто выберите специальность и мы вам покажем всех врачей данного профиля и филиалы учреждений, где они принимают:</p>
+    <mat-card
+      fxLayout="row wrap"
+      fxLayoutAlign="center"
+    >
+      <div
+        fxLayout="row wrap"
+        fxLayoutGap="1rem"
+        fxLayoutAlign="center"
+      >
+        <button
+          class="speciality-button"
+          *ngFor="let speciality of specialities"
+          mat-flat-button
+          [color]="selectedSpeciality === speciality.id ? 'accent' : 'primary'"
+          (click)="selectSpeciality(speciality.id)"
+        >
+          {{speciality.name}}
+        </button>
+      </div>
+    </mat-card>
+  </section>
+</div>
+
+<div class="container">
+  <section class="section" id="appointment-form">
+    <div
+      fxLayout="row"
+      fxLayoutGap="1rem"
+      class="centers-and-staff"
+    >
+      <div>
+        <h2>Филиалы</h2>
+        <div *ngFor="let clinic of clinics">
+          <mat-card>
+            <mat-card-title>{{clinic.address}}</mat-card-title>
+            <mat-card-subtitle>{{clinic.name}}</mat-card-subtitle>
+            <mat-card-content>
+              <mat-chip-list>
+                <mat-chip>15 специалистов</mat-chip>
+              </mat-chip-list>
+            </mat-card-content>
+            <mat-card-actions>
+              <button
+                mat-stroked-button
+                color="primary"
+                class="mat-button_action_select"
+              >Выбрать</button>
+            </mat-card-actions>
+          </mat-card>
+          <br>
+        </div>
+      </div>
+
+      <div>
+        <h2>Специалисты</h2>
+        <div *ngFor="let doctor of doctors">
+          <ng-container *ngIf="!selectedSpeciality || doctor.speciality_id === selectedSpeciality">
+            <mat-card>
+              <mat-card-title>
+                {{doctor.last_name}}
+                {{doctor.first_name}}
+                {{doctor.middle_name}}
+              </mat-card-title>
+              <mat-card-subtitle>{{doctor.speciality}}</mat-card-subtitle>
+              <mat-card-content>
+                <mat-chip-list>
+                  <mat-chip>Стаж: {{doctor.experience}} лет</mat-chip>
+                </mat-chip-list>
+              </mat-card-content>
+              <mat-card-actions>
+                <button
+                  mat-stroked-button
+                  color="primary"
+                  class="mat-button_action_select"
+                >Выбрать</button>
+              </mat-card-actions>
+            </mat-card>
+            <br>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

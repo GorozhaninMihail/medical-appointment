@@ -1,0 +1,132 @@
+<section class="section">
+  <div
+    class="auth-form"
+    fxLayout="row"
+    fxLayoutAlign="center center"
+  >
+    <div class="auth-form__box">
+      <mat-tab-group
+        [selectedIndex]="selectedTab"
+        (selectedIndexChange)="setTab($event)"
+      >
+        <mat-tab label="Зарегистрироваться">
+          <mat-card>
+            <mat-card-title>Регистрация</mat-card-title>
+            <mat-card-subtitle>
+              Уже зарегистрированы?
+              <a href="#" (click)="setTabAuth($event)">Войдите в систему</a>
+            </mat-card-subtitle>
+
+            <form class="auth-form__form">
+              <mat-form-field>
+                <input
+                  matInput
+                  placeholder="Ваше имя"
+                  required
+                >
+              </mat-form-field>
+
+              <mat-form-field>
+                <input
+                  matInput
+                  placeholder="Ваша фамилия"
+                  required
+                >
+              </mat-form-field>
+
+              <mat-form-field>
+                <input
+                  matInput
+                  placeholder="Ваше отчество (при наличии)"
+                >
+              </mat-form-field>
+
+              <mat-form-field>
+                <input
+                  matInput
+                  type="email"
+                  placeholder="E-mail"
+                  required
+                >
+              </mat-form-field>
+
+              <mat-form-field>
+                <input
+                  matInput
+                  placeholder="Номер телефона"
+                  required
+                >
+              </mat-form-field>
+
+              <mat-form-field>
+                <input
+                  matInput
+                  type="password"
+                  placeholder="Пароль"
+                  required
+                >
+              </mat-form-field>
+            </form>
+
+            <button type="submit" mat-raised-button color="primary">Отправить</button>
+          </mat-card>
+        </mat-tab>
+
+        <mat-tab label="Войти в систему">
+          <mat-card>
+            <mat-card-title>Вход в систему</mat-card-title>
+            <mat-card-subtitle>
+              Забыли пароль?
+              <a href="" (click)="setTabPasswordRecovery($event)">Восстановите его здесь</a>
+            </mat-card-subtitle>
+
+            <form class="auth-form__form">
+              <mat-form-field>
+                <input
+                  matInput
+                  placeholder="E-mail"
+                  required
+                >
+              </mat-form-field>
+
+              <mat-form-field>
+                <input
+                  matInput
+                  type="password"
+                  placeholder="Пароль"
+                  required
+                >
+              </mat-form-field>
+            </form>
+
+            <button type="submit" mat-raised-button color="primary">Отправить</button>
+          </mat-card>
+        </mat-tab>
+
+        <mat-tab label="Забыли пароль?">
+          <mat-card>
+            <mat-card-title>Восстановление пароля</mat-card-title>
+            <mat-card-subtitle>
+              Вы также можете
+              <a href="" (click)="setTabRegistration($event)">зарегистрироваться</a>
+              или
+              <a href="" (click)="setTabAuth($event)">войти в систему</a>
+            </mat-card-subtitle>
+
+            <form class="auth-form__form">
+              <mat-form-field>
+                <input
+                  matInput
+                  placeholder="E-mail"
+                  required
+                >
+              </mat-form-field>
+            </form>
+
+            <button type="submit" mat-raised-button color="primary">Отправить</button>
+          </mat-card>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  </div>
+</section>

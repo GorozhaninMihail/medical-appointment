@@ -4,8 +4,6 @@
 
 // n/a
 
-
-
 /**
  * 404 (Not Found) Handler
  *
@@ -24,17 +22,15 @@
  * automatically.
  */
 
-module.exports = function notFound (err) {
-
+module.exports = function notFound(err) {
   // Get access to `req` and `res`
-  var req = this.req;
-  var res = this.res;
+  const {req, res} = this;
 
   // Get access to `sails`
-  var sails = req._sails;
+  const sails = req._sails;
 
-  var error = {
-    error: err
+  const error = {
+    error: err,
   };
 
   // Set status code

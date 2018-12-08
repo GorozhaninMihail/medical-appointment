@@ -4,8 +4,6 @@
 
 // n/a
 
-
-
 /**
  * 403 (Forbidden) Handler
  *
@@ -18,8 +16,7 @@
  * ```
  */
 
-module.exports = function forbidden (err) {
-
+module.exports = function forbidden(err) {
   // Get access to `res`
   let res = this.res;
   res.status(403);
@@ -29,5 +26,4 @@ module.exports = function forbidden (err) {
   };
 
   return res.json(error);
-
 };

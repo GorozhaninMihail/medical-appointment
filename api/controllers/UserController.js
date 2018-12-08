@@ -14,9 +14,10 @@ module.exports = {
   async userByName(req, res) {
     const userList = await User.find({
       name: {
-        contains: req.param('name', '')
-      }
+        contains: req.param('name', ''),
+      },
     });
+
     return res.json(userList);
-  }
+  },
 };
