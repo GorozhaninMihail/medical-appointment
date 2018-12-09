@@ -7,7 +7,18 @@
 
 module.exports = {
   async allClinics(req, res) {
-    const centreList = await MedicalCentre.find();
+    const centreList = await MedicalCentre.find({sort: 'id'});
+    const doctors_clinics = await sails.sendNativeQuery('SELECT * FROM doctors_centres ORDER BY centre_id');
+    let i = 0;
+    centreList.forEach(function(clinic) {
+      /* Список врачей, работающих в учреждении */
+      let doctors = new Array();
+      while(i < doctors_clinics.rows.length && doctors_clinics.rows[i].centre_id == clinic.id) {
+        doctors.push(doctors_clinics.rows[i].doctor_id);
+        i++;
+      }
+      clinic.doctors = doctors;
+    });
     return res.json(centreList);
   },
 

@@ -6,15 +6,27 @@
  */
 
 const query = `
-  SELECT ${Doctor.tableName}.*, ${Speciality.tableName}.${Speciality.schema.name.columnName} AS speciality,
-  ${User.tableName}.${User.schema.last_name.columnName}, ${User.tableName}.${User.schema.first_name.columnName}, ${User.tableName}.${User.schema.middle_name.columnName}
-  FROM ${Doctor.tableName}
-  JOIN ${Speciality.tableName} ON ${Speciality.tableName}.${Speciality.schema.id.columnName} = ${Doctor.tableName}.${Doctor.schema.speciality.columnName}
-  JOIN ${User.tableName} ON ${User.tableName}.${User.schema.id.columnName} = ${Doctor.tableName}.${Doctor.schema.id.columnName}`;
+  SELECT doctors.*, specialities.name AS speciality,
+  users.last_name, users.first_name, users.middle_name
+  FROM doctors
+  JOIN specialities ON specialities.speciality_id = doctors.speciality_id
+  JOIN users ON users.user_id = doctors.doctor_id
+  ORDER BY doctors.doctor_id`;
 
 module.exports = {
   async allDoctors(req, res) {
     const doctors = await sails.sendNativeQuery(query);
+    const doctors_clinics = await sails.sendNativeQuery('SELECT * FROM doctors_centres ORDER BY doctor_id');
+    let i = 0;
+    doctors.rows.forEach(function(doctor) {
+      /* Список клиник для каждого доктора */
+      let clinics = new Array();
+      while(i < doctors_clinics.rows.length && doctors_clinics.rows[i].doctor_id == doctor.doctor_id) {
+        clinics.push(doctors_clinics.rows[i].centre_id);
+        i++;
+      }
+      doctor.clinics = clinics;
+    });
     return res.json(doctors.rows);
   },
 
@@ -25,7 +37,7 @@ module.exports = {
       return res.badRequest('Incorrect doctor ID');
     }
 
-    const whereClause = `WHERE ${Doctor.tableName}.${Doctor.schema.id.columnName} IN (SELECT doctor_id FROM doctors_centres WHERE centre_id = $1)`;
+    const whereClause = `WHERE doctors.doctor_id IN (SELECT doctor_id FROM doctors_centres WHERE centre_id = $1)`;
 
     const doctors = await sails.sendNativeQuery(
       `${query} ${whereClause}`,
@@ -45,7 +57,7 @@ module.exports = {
       return res.badRequest('Incorrect doctor ID');
     }
 
-    const whereClause = `WHERE ${Doctor.tableName}.${Doctor.schema.id.columnName} = $1 LIMIT 1`;
+    const whereClause = `WHERE doctors.doctor_id = $1 LIMIT 1`;
 
     const doctors = await sails.sendNativeQuery(
       `${query} ${whereClause}`,
