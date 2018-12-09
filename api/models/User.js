@@ -8,47 +8,50 @@
 module.exports = {
   tableName: 'users',
   primaryKey: 'id',
+
   attributes: {
     id: {
       type: 'number',
       unique: true,
       columnName: 'user_id',
-      autoIncrement: true
+      autoIncrement: true,
     },
+
     last_name: {
       type: 'string',
-      required: true
+      required: true,
     },
+
     first_name: {
       type: 'string',
-      required: true
+      required: true,
     },
+
     middle_name: {
       type: 'string',
-      required: true
+      required: true,
     },
+
     email: {
       type: 'string',
-      required: true
+      required: true,
     },
+
     phone_number: {
       type: 'string',
-      required: true
+      required: true,
     },
+
     password: {
       type: 'string',
-      required: true
+      required: true,
     },
+
     type: {
       type: 'string',
       required: true,
-      isIn: ['user', 'doctor', 'admin']
-    }
-
+      isIn: ['user', 'doctor', 'admin'],
+    },
   },
-
-  getFullName: function() {
-    return this.last_name + " " + this.first_name[0] + "." + this.middle_name[0] + ".";
-  }
 };
 

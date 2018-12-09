@@ -1,0 +1,24 @@
+@import "./assets/styles/custom-material-theme.scss";
+@import "./assets/styles/vars.scss";
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding-top: 64px;
+}
+
+a {
+  text-decoration: none;
+}
+
+.container {
+  margin: 0 auto;
+  max-width: $container-max-width;
+}
+
+.section {
+  padding: 1rem;
+}
