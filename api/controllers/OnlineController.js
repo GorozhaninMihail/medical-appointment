@@ -4,19 +4,18 @@
  * @description :: Server-side actions for handling incoming requests.
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
+var QuestionsService = require('../services/QuestionsService');
 
 module.exports = {
   async addQuestion(req, res) {
     const {body} = req;
 
     const result = sails.helpers.parametersCheck(req, ['user_id', 'title', 'text']);
-
     if (result.error) {
       return res.badRequest(result.error);
     }
 
     const user = await User.find({id: body.user_id});
-
     if (!user) {
       return res.notFound('Such a user was not found.');
     }
@@ -45,17 +44,7 @@ module.exports = {
       }
     }
 
-    await sails.sendNativeQuery(
-      'INSERT INTO consultations (user_id, doctor_id, specialist_id, title, text, time) VALUES ($1, $2, $3, $4, $5, NOW())',
-      [
-        body.user_id,
-        body.doctor_id,
-        body.speciality_id,
-        body.title,
-        body.text,
-      ]
-    );
-
+    await QuestionsService.createNewQuestion(body);
     return res.sendStatus(201);
   },
 
@@ -76,40 +65,23 @@ module.exports = {
         return res.notFound(`User with ID ${userID} is not found.`);
       }
 
-      const selectQuestionQuery = `SELECT * FROM consultations
-        WHERE user_id = $1
-        ORDER BY completed, time`;
-
-      questions = await sails.sendNativeQuery(selectQuestionQuery, [userID]);
+      questions = await QuestionsService.getQuestionsForUser(userID);
     } else if (doctorID) {
       const doctor = await Doctor.findOne({id: doctorID});
-
       if (!doctor) {
         return res.notFound(`Doctor with ID ${doctorID} is not found.`);
       }
-
-      const selectQuestionQuery = `SELECT * FROM consultations
-        WHERE doctor_id = $1 OR specialist_id = $2
-        ORDER BY completed, time`;
-
-      questions = await sails.sendNativeQuery(selectQuestionQuery, [doctorID, doctor.speciality]);
+      questions = await QuestionsService.getQuestionsForDoctor(doctorID, doctor);
     }
-    return res.json(questions.rows);
+    return res.json(questions);
   },
 
   async closeQuestion(req, res) {
     const questionID = Number(req.param('id'));
-
-    const CLOSE_QUESTION_QUERY = `UPDATE consultations
-      SET completed = true
-      WHERE consultation_id = $1 AND user_id = 1`;
-
-    const queryResult = await sails.sendNativeQuery(CLOSE_QUESTION_QUERY, [questionID]);
-
-    if (!queryResult.rowCount) {
+    const closeResult = await QuestionsService.closeQuestion(questionID, 1); // Заменить 1 на userID
+    if(!closeResult.rowCount) {
       return res.notFound('Question not found');
     }
-
     return res.ok();
   },
 
@@ -140,9 +112,7 @@ module.exports = {
       return res.notFound(`User with ID ${body.userID} is not found.`);
     }
 
-    const query = 'INSERT INTO messages (consultation_id, user_id, time, message) VALUES ($1, $2, NOW(), $3)';
-
-    await sails.sendNativeQuery(query, [questionID, body.userID, body.message]);
+    await QuestionsService.addAnswerToQuestion(questionID, body);
 
     return res.sendStatus(201);
   },
@@ -163,9 +133,7 @@ module.exports = {
     const selectMessages = 'SELECT * FROM messages WHERE consultation_id = $1 ORDER BY time';
 
     questionInfo.question = (await sails.sendNativeQuery(selectQuestion, [questionID])).rows[0];
-
     questionInfo.messaged = (await sails.sendNativeQuery(selectMessages, [questionID])).rows;
-
     return res.json(questionInfo);
   },
 };

@@ -33,5 +33,5 @@ module.exports = {
     if(doctorInfo === null)
       return res.notFound(`Doctor with ID ${doctorID} was not found`)
     return res.json(doctorInfo);
-  },
+  }
 };
