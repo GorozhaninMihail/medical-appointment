@@ -1,5 +1,7 @@
-var supertest = require('supertest');
-var DoctorService = require('../../../api/services/DoctorService')
+const supertest = require('supertest');
+const DoctorService = require('../../../api/services/DoctorService');
+const UserService = require('../../../api/services/UserService');
+const assert = require('assert');
 
 function isContainsParams(object, params) {
   let result = {};
@@ -10,7 +12,12 @@ function isContainsParams(object, params) {
     }
   }
   return result;
+};
+
+function setToArray(setInstance) {
+  return Array.from(setInstance).sort((a ,b) => b - a);
 }
+
 
 describe('DataCheck', function() {
 
@@ -57,13 +64,25 @@ describe('DataCheck', function() {
     });
 
     describe('#checkDoctorsRole()', function() {
-      it('checks that all users with role doctor are written in Doctors table', function (done) {
-        var doctorList = DoctorService.getAllDoctors();
+      it('checks that all users with role doctor are written in Doctors table', async function () {
+        var doctorList = await DoctorService.getAllDoctors();
         let doctorIDs = new Set();
+        let doctorIDs2 = new Set();
+
         doctorList.forEach(function(doctor) {
           doctorIDs.add(doctor.doctor_id);
         });
+
+        var userList = await UserService.getAllUsers();
+        userList.forEach(function(user) {
+          if(user.type === 'doctor') {
+            doctorIDs2.add(user.id);
+          }
+        });
         
+        doctorIDs = setToArray(doctorIDs);
+        doctorIDs2 = setToArray(doctorIDs2);
+        assert.ok(doctorIDs.length == doctorIDs2.length && doctorIDs.every(function(id, i) { return doctorIDs2[i] === id }));
       });
     });
   

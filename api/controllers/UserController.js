@@ -5,19 +5,17 @@
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
 
+ let UserService = require('../services/UserService');
+
 module.exports = {
   async allUsers(req, res) {
-    const userList = await User.find();
+    const userList = await UserService.getAllUsers();
     return res.json(userList);
   },
 
   async userByName(req, res) {
-    const userList = await User.find({
-      name: {
-        contains: req.param('name', ''),
-      },
-    });
-
+    let userName = req.param('name', '');
+    let userList = await UserService.getUserByName(userName);
     return res.json(userList);
   },
 };
