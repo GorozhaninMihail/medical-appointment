@@ -1,6 +1,6 @@
 const supertest = require('supertest');
-const DoctorService = require('../../../api/services/DoctorService');
-const UserService = require('../../../api/services/UserService');
+const DoctorService = require('../../api/services/DoctorService');
+const UserService = require('../../api/services/UserService');
 const assert = require('assert');
 
 function isContainsParams(object, params) {
@@ -83,6 +83,20 @@ describe('DataCheck', function() {
         doctorIDs = setToArray(doctorIDs);
         doctorIDs2 = setToArray(doctorIDs2);
         assert.ok(doctorIDs.length == doctorIDs2.length && doctorIDs.every(function(id, i) { return doctorIDs2[i] === id }));
+      });
+    });
+
+    describe('#checkDoctorTimesheet()', function() {
+      it('checks that doctors do not have several timesheet rows in one time', async function () {
+        var timesheetRows = await DoctorService.getDuplicateTimesheetRows();
+        assert.ok(timesheetRows.length === 0);
+      });
+    });
+
+    describe('#checkOrders()', function() {
+      it('checks that there are no orders for incorrect time', async function () {
+        var orders = await DoctorService.getWrongOrderRows();
+        assert.ok(orders.length === 0);
       });
     });
   

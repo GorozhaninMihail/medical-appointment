@@ -68,7 +68,7 @@
     "server": "cross-env NODE_ENV=production node app",
     "server:dev": "node app",
     "server:nodemon": "nodemon app",
-    "test": "node ./node_modules/mocha/bin/mocha test/lifecycle.test.js test/integration/**/*.test.js",
+    "test": "node ./node_modules/mocha/bin/mocha test/lifecycle.test.js test/**/*.test.js",
     "lint": "eslint . --max-warnings=0 --report-unused-disable-directives && echo '✔  Your .js files look good.'",
     "custom-tests": "echo \"(No other custom tests yet.)\" && echo"
   },
