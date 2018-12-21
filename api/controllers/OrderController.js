@@ -4,126 +4,121 @@
  * @description :: Server-side actions for handling incoming requests.
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
-var DoctorService = require('../services/DoctorService');
+/* global Clinic User Doctor */
+const DoctorService = require('../services/DoctorService');
 
 module.exports = {
-  async makeOrder(req, res) {
-    const result = sails.helpers.parametersCheck(req, ['mc_id', 'user_id', 'doctor_id', 'date', 'time', 'description']);
-    if (result.error) {
-      return res.badRequest(result.error);
+  async postMakeOrder(req, res) {
+    const {clinicId, doctorId, date, time, description} = req.body;
+
+    const userId = req.user.id;
+
+    if (!clinicId || !doctorId || !date || !time || !description) {
+      return res.badRequest('Недостаточно данных.');
     }
 
-    const {body} = req;
+    const clinic = await Clinic.findOne({id: clinicId});
+    const doctor = await Doctor.findOne({id: doctorId});
 
-    const mc = await MedicalCentre.find({id: body.mc_id});
-    const user = await User.find({id: body.user_id});
-    const doctor = await Doctor.find({id: body.doctor_id});
-
-    if (!mc.length) {
-      return res.notFound(`Medical Centre with ID ${body.mc_id} is not found.`);
+    if (!clinic || !doctor) {
+      return res.badRequest('Неверный запрос.');
     }
 
-    if (!user.length) {
-      return res.notFound(`User with ID ${body.user_id} is not found.`);
-    }
-
-    if (!doctor.length) {
-      return res.notFound(`Doctor with ID ${body.doctor_id} is not found.`);
-    }
-
-    const doctorOrder = await DoctorService.getDoctorTime(body);
+    const doctorOrder = await DoctorService.getDoctorTime({
+      clinicId,
+      doctorId,
+      date,
+      time,
+    });
 
     if (!doctorOrder.length) {
-      return res.notFound('Incorrect time.');
+      return res.badRequest('Похоже, что выбранное вами время уже занято.');
     }
 
     let order = doctorOrder[0];
+
     if (order.patient_id !== null) {
-      return res.notFound('This time is already busy.');
+      return res.badRequest('Похоже, что выбранное вами время уже занято.');
     }
 
-    await DoctorService.createOrder(body);
-    return res.ok();
+    await DoctorService.createOrder({
+      clinicId,
+      doctorId,
+      date,
+      time,
+      userId,
+      description,
+    });
+
+    return res.status(201).send();
   },
 
-  async cancelOrder(req, res) {
-    const result = sails.helpers.parametersCheck(req, ['mc_id', 'user_id', 'doctor_id', 'date', 'time']);
-    if (result.error) {
-      return res.badRequest(result.error);
+  async deleteCancelOrder(req, res) {
+    const {clinicId, userId, doctorId, date, time} = req.body;
+
+    if (!clinicId || !userId || !doctorId || !date || !time) {
+      return res.badRequest('Недостаточно данных.');
     }
 
-    const {body} = req;
-
-    const mc = await MedicalCentre.find({id: body.mc_id});
-    const user = await User.find({id: body.user_id});
-    const doctor = await Doctor.find({id: body.doctor_id});
-
-    if (mc.length === 0) {
-      return res.notFound(`Medical Centre with ID ${body.mc_id} is not found.`);
-    }
-
-    if (!user.length) {
-      return res.notFound(`User with ID ${body.user_id} is not found.`);
-    }
-
-    if (!doctor.length) {
-      return res.notFound('Doctor was not found');
-    }
-
-    const cancelQueryResult = await DoctorService.cancelOrder(body);
-
-    if (cancelQueryResult.rowCount === 0) {
-      return res.notFound('This time is not owned by you');
-    }
-
-    return res.ok();
-  },
-
-  async changeStatusOrder(req, res) {
-    const result = sails.helpers.parametersCheck(req, ['mc_id', 'user_id', 'doctor_id', 'date', 'time', 'status']);
-    if (result.error) {
-      return res.badRequest(result.error);
-    }
-
-    const {body} = req;
-    const mc = await MedicalCentre.find({id: body.mc_id});
-    const user = await User.find({id: body.user_id});
-    const doctor = await Doctor.find({id: body.doctor_id});
-
-    if (mc.length === 0) {
-      return res.notFound(`Medical Centre with ID ${body.mc_id} is not found.`);
-    }
-
-    if (user.length === 0) {
-      return res.notFound(`User with ID ${body.user_id} is not found.`);
-    }
-
-    if (doctor.length === 0) {
-      return res.notFound(`Doctor with ID ${body.doctor_id} is not found.`);
-    }
-
-    const updateQueryResult = await DoctorService.changeOrderStatus(body);
-
-    if (updateQueryResult.rowCount === 0) {
-      return res.notFound('This time is not owned by you');
-    }
-    return res.ok();
-  },
-
-  async orderList(req, res) {
-    const userId = req.param('user');
-
-    if (!userId) {
-      return res.badRequest('Param user is undefined');
-    }
-
+    const clinic = await Clinic.find({id: clinicId});
     const user = await User.find({id: userId});
+    const doctor = await Doctor.find({id: doctorId});
 
-    if (!user.length) {
-      return res.notFound(`User with ID ${userId} is not found.`);
+    if (!clinic || !user || !doctor) {
+      return res.badRequest('Невозможно отменить данную консультацию.');
     }
+
+    const cancelQueryResult = await DoctorService.cancelOrder({
+      clinicId,
+      doctorId,
+      date,
+      time,
+      userId,
+    });
+
+    if (!cancelQueryResult.rowCount) {
+      return res.badRequest('Невозможно отменить данную консультацию.');
+    }
+
+    return res.ok();
+  },
+
+  async putChangeStatusOrder(req, res) {
+    const {clinicId, userId, doctorId, date, time, status} = req.body;
+
+    if (!clinicId || !userId || !doctorId || !date || !time || !status) {
+      return res.badRequest('Недостаточно данных.');
+    }
+
+    const clinic = await Clinic.find({id: clinicId});
+    const user = await User.find({id: userId});
+    const doctor = await Doctor.find({id: doctorId});
+
+    if (!clinic || !user || !doctor) {
+      return res.badRequest('Невозможно отменить данную консультацию.');
+    }
+
+    const updateQueryResult = await DoctorService.changeOrderStatus({
+      status,
+      clinicId,
+      doctorId,
+      date,
+      time,
+      userId,
+    });
+
+    if (!updateQueryResult.rowCount) {
+      return res.notFound('Невозможно изменить статус консультации на указанное вами.');
+    }
+
+    return res.ok();
+  },
+
+  async getOrderList(req, res) {
+    const userId = req.user.id;
 
     const orders = await DoctorService.getUserOrders(userId);
+
     return res.json(orders);
   },
 };

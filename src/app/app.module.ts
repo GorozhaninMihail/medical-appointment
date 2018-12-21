@@ -1,10 +1,14 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
-import {HttpClientModule} from '@angular/common/http';
+import {HttpClientModule, HTTP_INTERCEPTORS} from '@angular/common/http';
 
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {MaterialModule} from './material.module';
 import {FlexLayoutModule} from '@angular/flex-layout';
+import {MatMomentDateModule} from '@angular/material-moment-adapter';
+import {MAT_DATE_LOCALE} from '@angular/material';
+import {FormsModule} from '@angular/forms';
+
+import {MaterialModule} from './material.module';
 
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
@@ -16,6 +20,10 @@ import {ApiService} from './services/api.service';
 import {ClinicsService} from './services/clinics.service';
 import {DoctorsService} from './services/doctors.service';
 import {AuthComponent} from './auth/auth.component';
+import {JwtInterceptor} from './interceptors/jwt.interceptor.ts.service';
+
+import {AppointmentFormComponent} from './home/appointment-form/appointment-form.component';
+import { ProfileComponent } from './profile/profile.component';
 
 @NgModule({
   declarations: [
@@ -23,13 +31,17 @@ import {AuthComponent} from './auth/auth.component';
     HomeComponent,
     NavbarComponent,
     AuthComponent,
+    AppointmentFormComponent,
+    ProfileComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
     BrowserAnimationsModule,
+    FormsModule,
     MaterialModule,
+    MatMomentDateModule,
     FlexLayoutModule,
   ],
   providers: [
@@ -37,6 +49,15 @@ import {AuthComponent} from './auth/auth.component';
     ApiService,
     ClinicsService,
     DoctorsService,
+    {provide: MAT_DATE_LOCALE, useValue: 'ru'},
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: JwtInterceptor,
+      multi: true,
+    },
+  ],
+  entryComponents: [
+    AppointmentFormComponent,
   ],
   bootstrap: [AppComponent],
 })
