@@ -11,7 +11,7 @@
             <table mat-table [dataSource]="orders" class="mat-elevation-z8">
               <ng-container matColumnDef="date">
                 <th mat-header-cell *matHeaderCellDef>Дата</th>
-                <td mat-cell *matCellDef="let element">{{element.date}}</td>
+                <td mat-cell *matCellDef="let element">{{element.date | date:"dd.MM.yyyy" }}</td>
               </ng-container>
 
               <ng-container matColumnDef="time">
@@ -21,7 +21,7 @@
 
               <ng-container matColumnDef="doctor">
                   <th mat-header-cell *matHeaderCellDef>Врач</th>
-                  <td mat-cell *matCellDef="let element">{{element.last_name}}</td>
+                  <td mat-cell *matCellDef="let element">{{element.last_name}} {{element.first_name[0]}}.{{element.middle_name[0]}}.</td>
                 </ng-container>
 
               <ng-container matColumnDef="status">
