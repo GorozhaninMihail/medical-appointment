@@ -20,9 +20,11 @@
 >
   <div class="section">
     <h1>Запись на приём</h1>
-    <p>Для того, чтобы записаться на приём к интересующему вас специалисту выберите направление, филиал медицинского учреждения или непосредственно специалиста. Также вы должны быть зарегистрированы в нашей системе.</p>
-    <mat-card>
+    <p>Для того, чтобы записаться на приём к интересующему вас специалисту выберите направление, филиал медицинского учреждения или непосредственно специалиста</p>
+
+    <mat-card *ngIf="!isLogged()">
       <mat-card-content>
+        <h2>Необходима регистрация</h2>
         Используйте кнопки ниже для того, чтобы зарегистрироваться или войти в систему. Это важно, поскольку нам нужно подтвердить вашу личность и проверить, действительно хотите воспользоваться нашими услугами.
       </mat-card-content>
       <mat-card-actions>
@@ -46,26 +48,16 @@
   <section class="section">
     <h1>Специалиста в какой области вы ищите?</h1>
     <p>Просто выберите специальность и мы вам покажем всех врачей данного профиля и филиалы учреждений, где они принимают:</p>
-    <mat-card
-      fxLayout="row wrap"
-      fxLayoutAlign="center"
-    >
-      <div
-        fxLayout="row wrap"
-        fxLayoutGap="1rem"
-        fxLayoutAlign="center"
+
+    <mat-chip-list>
+      <mat-chip
+        *ngFor="let speciality of specialities"
+        [selected]="selectedSpeciality === speciality.id"
+        (click)="toggleSpeciality(speciality.id)"
       >
-        <button
-          class="speciality-button"
-          *ngFor="let speciality of specialities"
-          mat-flat-button
-          [color]="selectedSpeciality === speciality.id ? 'accent' : 'primary'"
-          (click)="selectSpeciality(speciality.id)"
-        >
-          {{speciality.name}}
-        </button>
-      </div>
-    </mat-card>
+        {{speciality.name}}
+      </mat-chip>
+    </mat-chip-list>
   </section>
 </div>
 
@@ -77,31 +69,69 @@
       class="centers-and-staff"
     >
       <div>
-        <h2>Филиалы</h2>
+        <h2>
+          <span
+            [matBadge]="clinics.length"
+            matBadgeOverlap="false"
+          >
+            Все наши филиалы
+          </span>
+        </h2>
         <div *ngFor="let clinic of clinics">
           <mat-card>
             <mat-card-title>{{clinic.address}}</mat-card-title>
             <mat-card-subtitle>{{clinic.name}}</mat-card-subtitle>
             <mat-card-content>
-              <mat-chip-list>
-                <mat-chip>15 специалистов</mat-chip>
-              </mat-chip-list>
+              <p
+                fxLayout="row"
+                fxLayoutAlign="center"
+              >
+                <button
+                  fxFlexFill
+                  mat-stroked-button
+                  [color]="selectedClinic === clinic.id ? 'warn' : 'primary'"
+                  class="mat-button_action_select"
+                  (click)="toggleClinic(clinic.id)"
+                >
+                  {{selectedClinic === clinic.id ? 'Скрыть врачей только из данной клиники' : 'Посмотреть ' + clinic.doctors.length + ' специалистов'}}
+                </button>
+              </p>
             </mat-card-content>
-            <mat-card-actions>
-              <button
-                mat-stroked-button
-                color="primary"
-                class="mat-button_action_select"
-              >Выбрать</button>
-            </mat-card-actions>
           </mat-card>
           <br>
         </div>
       </div>
 
       <div>
-        <h2>Специалисты</h2>
-        <div *ngFor="let doctor of doctors">
+        <h2>
+          <span
+            [matBadge]="visibleDoctors.length"
+            matBadgeOverlap="false"
+          >
+            {{selectedDoctorsHeader()}}
+          </span>
+        </h2>
+
+        <p
+          *ngIf="filtersApplied()"
+          fxLayout="row"
+          fxLayoutAlign="center"
+        >
+          <button
+            fxFlexFill
+            mat-stroked-button
+            color="primary"
+            (click)="showAllDoctors()"
+          >
+            Показать всех врачей
+          </button>
+        </p>
+
+        <mat-card *ngIf="visibleDoctors.length === 0">
+          В данном филиале пока не принимает ни один врач.
+        </mat-card>
+
+        <div *ngFor="let doctor of visibleDoctors">
           <ng-container *ngIf="!selectedSpeciality || doctor.speciality_id === selectedSpeciality">
             <mat-card>
               <mat-card-title>
@@ -110,18 +140,32 @@
                 {{doctor.middle_name}}
               </mat-card-title>
               <mat-card-subtitle>{{doctor.speciality}}</mat-card-subtitle>
+
               <mat-card-content>
-                <mat-chip-list>
-                  <mat-chip>Стаж: {{doctor.experience}} лет</mat-chip>
-                </mat-chip-list>
+                <p>{{doctor.information}}</p>
+                <p>
+                  Стаж: {{doctor.experience}} лет
+                  <span
+                    *ngFor="let clinicId of doctor.clinics"
+                  >
+                    •
+                    <a (click)="toggleClinic(getClinicById(clinicId).id)">
+                      {{getClinicById(clinicId).name}}
+                    </a>
+                  </span>
+                </p>
+
+                <p>
+                  <button
+                    mat-raised-button
+                    color="accent"
+                    class="mat-button_action_select"
+                    (click)="openAppointmentForm(doctor)"
+                  >
+                    Записаться на приём
+                  </button>
+                </p>
               </mat-card-content>
-              <mat-card-actions>
-                <button
-                  mat-stroked-button
-                  color="primary"
-                  class="mat-button_action_select"
-                >Выбрать</button>
-              </mat-card-actions>
             </mat-card>
             <br>
           </ng-container>

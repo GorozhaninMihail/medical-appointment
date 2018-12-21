@@ -1,0 +1,134 @@
+<h1>Запись на приём</h1>
+
+<p *ngIf="!doctor">Загрузка...</p>
+
+<div *ngIf="success">
+  <p>Вы успешно записались ко врачу! Скоро мы с вами свяжемся для подтверждения записи.</p>
+  <p>
+    <a
+      routerLink="profile"
+      mat-raised-button
+      color="primary"
+      (click)="closeForm()"
+    >Перейти в личный кабинет</a>
+  </p>
+</div>
+
+<form
+  *ngIf="doctor && !success"
+  (ngSubmit)="makeAppointment()"
+  #appointmentForm="ngForm"
+>
+  <h2>Врач</h2>
+  <mat-card color="primary">
+    <mat-card-title>
+      {{doctor.last_name}} {{doctor.first_name}} {{doctor.middle_name}}
+    </mat-card-title>
+    <mat-card-subtitle>{{doctor.speciality}}</mat-card-subtitle>
+  </mat-card>
+
+  <h2>Выберите филиал</h2>
+  <mat-form-field>
+    <mat-select
+      class="form-element"
+      placeholder="Выберите филиал"
+      [(value)]="formModel.clinic"
+      (selectionChange)="clinicChanged()"
+      required
+    >
+      <mat-option
+        *ngFor="let clinicId of doctor.clinics"
+        [value]="clinicId"
+      >
+        {{getClinicById(clinicId).name}}
+        ({{getClinicById(clinicId).address}})
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <h2>Выберите дату приёма</h2>
+  <mat-form-field>
+    <input
+      class="form-element"
+      matInput
+      [matDatepicker]="picker"
+      [(ngModel)]="formModel.date"
+      #date="ngModel"
+      name="date"
+      placeholder="Выберите дату"
+      [(min)]="minDate"
+      [(max)]="maxDate"
+      (dateChange)="dateChanged()"
+      [disabled]="!formModel.clinic"
+      (click)="picker.open()"
+      required
+    >
+    <mat-datepicker-toggle
+      matSuffix
+      [for]="picker"
+    ></mat-datepicker-toggle>
+    <mat-datepicker
+      touchUi
+      #picker
+    ></mat-datepicker>
+  </mat-form-field>
+  <mat-error *ngIf="date.touched && date.invalid">
+    Врач не принимает в указанное время.
+  </mat-error>
+
+  <div *ngIf="formModel.date && !date.invalid">
+    <h2>Выберите время приёма</h2>
+    <mat-form-field>
+      <mat-select
+        class="form-element"
+        placeholder="Выберите время приёма"
+        [(value)]="formModel.time"
+        required
+      >
+        <mat-option
+          *ngFor="let time of freeTime"
+          [value]="time"
+        >
+          {{time}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <h2>Ваши жалобы</h2>
+  <mat-form-field>
+    <textarea
+      matInput
+      name="description"
+      [(ngModel)]="formModel.description"
+      #description="ngModel"
+      placeholder="На что вы жалуетесь?"
+      required
+    ></textarea>
+  </mat-form-field>
+  <mat-error *ngIf="description.touched && description.invalid">
+    Пожалуйста, опишите ваши жалобы.
+  </mat-error>
+
+  <mat-error *ngIf="error">
+    {{error}}
+  </mat-error>
+
+  <p
+    fxLayout="row"
+    fxLayoutAlign="space-between"
+    fxLayoutGap="1rem"
+  >
+    <button
+      mat-raised-button
+      type="submit"
+      color="accent"
+      [disabled]="appointmentForm.invalid"
+    >Записаться</button>
+    <button
+      mat-button
+      color="warn"
+      (click)="closeForm()"
+    >Отменить и закрыть окно</button>
+  </p>
+</form>

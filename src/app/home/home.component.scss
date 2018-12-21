@@ -4,20 +4,19 @@
   min-height: 50vh;
   color: #ffffff;
   border-radius: 0;
+  // background:
+  //   linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent),
+  //   url() 50% 50% / cover;
   background:
     linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent),
     url("https://img-fotki.yandex.ru/get/4126/119543383.23/0_934ff_6be28123_orig") 50% 50% / cover;
-}
-
-.mat-button_action_select {
-  width: 100%;
 }
 
 .centers-and-staff > * {
   flex: 1 1 50%;
 }
 
-.speciality-button {
-  margin-top: 5px;
-  margin-bottom: 5px;
+mat-chip {
+  cursor: pointer;
+  user-select: none;
 }

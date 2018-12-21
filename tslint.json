@@ -12,6 +12,8 @@
 
     // Overrided
     "ter-arrow-parens": false,
+    "no-this-assignment": false,
+    "object-shorthand-properties-first": false,
 
     // Vanilla TSLint Angular rules
     "arrow-return-shorthand": true,

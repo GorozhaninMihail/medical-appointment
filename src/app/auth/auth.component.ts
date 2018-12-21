@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {FormControl, Validators} from '@angular/forms';
+import {ProfileService} from '../services/profile.service';
 
 enum Tabs {
   Registration = 0,
@@ -13,9 +13,29 @@ enum Tabs {
   styleUrls: ['./auth.component.scss'],
 })
 export class AuthComponent {
-  selectedTab: Tabs = Tabs.Registration;
+  constructor(private profileService: ProfileService) {}
 
-  firstName = new FormControl('');
+  private selectedTab: Tabs = Tabs.Registration;
+
+  private signupModel = {
+    firstName: '',
+    lastName: '',
+    middleName: '',
+    email: '',
+    phone: '',
+    password: '',
+  };
+
+  private authModel = {
+    id: '',
+    password: '',
+  };
+
+  private registred = false;
+  private loggedIn = false;
+
+  private registrationError = '';
+  private loggingInError = '';
 
   setTab(tabIndex: Tabs): void {
     this.selectedTab = tabIndex;
@@ -34,5 +54,23 @@ export class AuthComponent {
   setTabPasswordRecovery(event: Event): void {
     event.preventDefault();
     this.selectedTab = Tabs.PasswordRecovery;
+  }
+
+  register(): void {
+    const {email, firstName, lastName, middleName, password, phone} = this.signupModel;
+
+    this.profileService.register(firstName, lastName, middleName, email, phone, password).subscribe(
+      () => this.registred = true,
+      ({error}) => this.registrationError = error,
+    );
+  }
+
+  auth(): void {
+    const {id, password} = this.authModel;
+
+    this.profileService.logIn(id, password).subscribe(
+      () => this.loggedIn = true,
+      ({error}) => this.loggingInError = error,
+    );
   }
 }
