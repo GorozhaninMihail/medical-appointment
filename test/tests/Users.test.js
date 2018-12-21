@@ -7,10 +7,10 @@ describe('User Functionality', function() {
 
     describe('#createAccount()', function() {
         it('should create new account', async function () {
-            const params = {last_name: 'TEST_account', first_name: 'TEST_account', middle_name: 'TEST_account',
-                email: 'TESTACCOUNT@email.com', phone_number: '+79999999999', password: 'TEST', type: 'user'};
-            let result = await UserService.createAccount(params);
-            assert(result.rowCount > 0);
+            const params = {lastName: 'TEST_account', firstName: 'TEST_account', middleName: 'TEST_account',
+                email: 'TESTACCOUNT@email.com', phone: '+79999999999', password: 'TEST', type: 'user'};
+            let result = await UserService.addUser(params);
+            assert(result);
         });
     }); 
 
