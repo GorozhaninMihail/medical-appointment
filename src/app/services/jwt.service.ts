@@ -7,7 +7,7 @@ export class JwtService {
   private tokenKey = 'jwttoken';
 
   getToken(): string {
-    return localStorage[this.tokenKey];
+    return localStorage[this.tokenKey] || '';
   }
 
   setToken(token: string): void {

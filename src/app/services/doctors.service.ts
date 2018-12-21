@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {ApiService} from './api.service';
-import {IDoctor} from '../models';
+import {IDoctor, DoctorId} from '../models';
 
 @Injectable({
   providedIn: 'root',
@@ -11,5 +11,9 @@ export class DoctorsService {
 
   getAll(): Observable<IDoctor[]> {
     return this.apiService.get('/doctors');
+  }
+
+  getById(id: DoctorId): Observable<IDoctor> {
+    return this.apiService.get(`/doctors/${id}`);
   }
 }

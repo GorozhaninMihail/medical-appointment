@@ -1,4 +1,6 @@
-import {Component, OnInit, ElementRef, AfterViewInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+import {ProfileService} from '../services/profile.service';
+import {IUser} from '../models';
 
 @Component({
   selector: 'app-navbar',
@@ -6,5 +8,13 @@ import {Component, OnInit, ElementRef, AfterViewInit} from '@angular/core';
   styleUrls: ['./navbar.component.scss'],
 })
 export class NavbarComponent {
-  constructor() {}
+  constructor(private profileService: ProfileService) {}
+
+  currentUser() {
+    return this.profileService.getCurrentUser();
+  }
+
+  logout(): void {
+    this.profileService.logOut();
+  }
 }

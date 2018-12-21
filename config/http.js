@@ -9,6 +9,9 @@
  * https://sailsjs.com/config/http
  */
 
+const jwt = require('express-jwt');
+const {custom} = require('./custom');
+
 module.exports.http = {
 
   /****************************************************************************
@@ -29,16 +32,22 @@ module.exports.http = {
     *                                                                          *
     ***************************************************************************/
 
-    // order: [
-    //   'cookieParser',
-    //   'session',
-    //   'bodyParser',
-    //   'compress',
-    //   'poweredBy',
-    //   'router',
-    //   'www',
-    //   'favicon',
-    // ],
+    jwt: jwt({
+      secret: custom.jwtSecret,
+      credentialsRequired: false,
+    }),
+
+    order: [
+      // 'cookieParser',
+      // 'session',
+      'bodyParser',
+      'compress',
+      // 'poweredBy',
+      // 'router',
+      // 'www',
+      // 'favicon',
+      'jwt',
+    ],
 
 
     /***************************************************************************

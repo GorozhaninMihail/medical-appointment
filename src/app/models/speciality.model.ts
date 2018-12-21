@@ -1,4 +1,6 @@
+export type SpecialityId = number;
+
 export interface ISpeciality {
-  id: number;
+  id: SpecialityId;
   name: string;
 }

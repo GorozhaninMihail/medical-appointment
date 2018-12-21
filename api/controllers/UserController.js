@@ -4,18 +4,24 @@
  * @description :: Server-side actions for handling incoming requests.
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
+/* global User */
 
  let UserService = require('../services/UserService');
 
 module.exports = {
-  async allUsers(req, res) {
-    const userList = await UserService.getAllUsers();
+  async getAllUsers(req, res) {
+    const userList = await User.find();
+
     return res.json(userList);
   },
 
-  async userByName(req, res) {
-    let userName = req.param('name', '');
-    let userList = await UserService.getUserByName(userName);
+  async getUsersByName(req, res) {
+    const userList = await User.find({
+      name: {
+        contains: req.param('name', ''),
+      },
+    });
+
     return res.json(userList);
   },
 };

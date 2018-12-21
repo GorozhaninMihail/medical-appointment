@@ -1,132 +1,238 @@
 <section class="section">
   <div
-    class="auth-form"
     fxLayout="row"
     fxLayoutAlign="center center"
   >
-    <div class="auth-form__box">
-      <mat-tab-group
-        [selectedIndex]="selectedTab"
-        (selectedIndexChange)="setTab($event)"
-      >
-        <mat-tab label="Зарегистрироваться">
-          <mat-card>
-            <mat-card-title>Регистрация</mat-card-title>
-            <mat-card-subtitle>
-              Уже зарегистрированы?
-              <a href="#" (click)="setTabAuth($event)">Войдите в систему</a>
-            </mat-card-subtitle>
+    <div class="auth-form">
+      <mat-card>
+        <mat-tab-group
+          [selectedIndex]="selectedTab"
+          (selectedIndexChange)="setTab($event)"
+        >
+          <mat-tab label="Регистрация">
+            <mat-card>
+              <p *ngIf="registred">
+                Вы успешно зарегистрированы. <a href="#" (click)="setTabAuth($event)">Теперь вы можете войти в свой аккаунт.</a>
+              </p>
 
-            <form class="auth-form__form">
-              <mat-form-field>
-                <input
-                  matInput
-                  placeholder="Ваше имя"
-                  required
+              <form
+                *ngIf="!registred"
+                (ngSubmit)="register()"
+                #registerForm="ngForm"
+              >
+                <mat-card-title>Регистрация</mat-card-title>
+                <mat-card-subtitle>
+                  Уже зарегистрированы?
+                  <a
+                    class="md-accent"
+                    href="#"
+                    (click)="setTabAuth($event)"
+                  >Войдите в систему</a>
+                </mat-card-subtitle>
+
+                <div
+                  fxLayout="column"
+                  fxFlexFill
                 >
-              </mat-form-field>
+                  <mat-form-field>
+                    <input
+                      matInput
+                      [(ngModel)]="signupModel.firstName"
+                      #firstName="ngModel"
+                      name="firstname"
+                      placeholder="Ваше имя"
+                      required
+                    >
+                  </mat-form-field>
+                  <mat-error *ngIf="firstName.touched && firstName.invalid">
+                    Необходимо указать имя.
+                  </mat-error>
 
-              <mat-form-field>
-                <input
-                  matInput
-                  placeholder="Ваша фамилия"
-                  required
+                  <mat-form-field>
+                    <input
+                      matInput
+                      [(ngModel)]="signupModel.lastName"
+                      #lastName="ngModel"
+                      name="lastname"
+                      placeholder="Ваша фамилия"
+                      required
+                    >
+                  </mat-form-field>
+                  <mat-error *ngIf="lastName.touched && lastName.invalid">
+                    Необходимо указать фамилию.
+                  </mat-error>
+
+                  <mat-form-field>
+                    <input
+                      matInput
+                      [(ngModel)]="signupModel.middleName"
+                      name="middlename"
+                      placeholder="Ваше отчество (при наличии)"
+                    >
+                  </mat-form-field>
+
+                  <mat-form-field>
+                    <input
+                      matInput
+                      [(ngModel)]="signupModel.email"
+                      #email="ngModel"
+                      type="email"
+                      name="email"
+                      placeholder="E-mail"
+                      autocomplete="off"
+                      required
+                    >
+                  </mat-form-field>
+                  <mat-error *ngIf="email.touched && email.invalid">
+                    Укажите корректный E-mail.
+                  </mat-error>
+
+                  <mat-form-field>
+                    <input
+                      matInput
+                      [(ngModel)]="signupModel.phone"
+                      #phone="ngModel"
+                      name="phone"
+                      placeholder="Номер телефона"
+                      autocomplete="off"
+                      pattern="^\+7\d{10}$"
+                      required
+                    >
+                  </mat-form-field>
+                  <mat-error *ngIf="phone.touched && phone.invalid">
+                    Укажите номер в формате +7XXXXXXXXXX (поддерживаются только номера из РФ).
+                  </mat-error>
+
+                  <mat-form-field>
+                    <input
+                      matInput
+                      [(ngModel)]="signupModel.password"
+                      #password="ngModel"
+                      name="password"
+                      placeholder="Пароль"
+                      type="password"
+                      pattern="^[\w\d_]{6,40}$"
+                      required
+                    >
+                  </mat-form-field>
+                  <mat-error *ngIf="password.touched && password.invalid">
+                    Пароль должен содержать от 6 до 40 символов латинского алфавита, цифр или символа "_".
+                  </mat-error>
+                </div>
+
+                <mat-error *ngIf="registrationError">
+                  {{registrationError}}
+                </mat-error>
+
+                <br>
+                <button
+                  type="submit"
+                  mat-raised-button
+                  color="accent"
+                  [disabled]="registerForm.invalid"
+                >Регистрация</button>
+              </form>
+            </mat-card>
+          </mat-tab>
+
+          <mat-tab label="Вход">
+            <mat-card>
+              <p *ngIf="loggedIn">
+                Вы успешно вошли в систему. <a href="/profile">Перейти в личный кабинет</a>
+              </p>
+
+              <form
+                (ngSubmit)="auth()"
+                #authForm="ngForm"
+                *ngIf="!loggedIn"
+              >
+                <mat-card-title>Вход в систему</mat-card-title>
+                <mat-card-subtitle>
+                  Забыли пароль?
+                  <a (click)="setTabPasswordRecovery($event)">Восстановите его здесь</a>
+                </mat-card-subtitle>
+
+                <div
+                  fxLayout="column"
+                  fxFlexFill
                 >
-              </mat-form-field>
+                  <mat-form-field>
+                    <input
+                      matInput
+                      [(ngModel)]="authModel.id"
+                      #id="ngModel"
+                      name="id"
+                      placeholder="E-mail или номер телефона"
+                      autocomplete="off"
+                      required
+                    >
+                  </mat-form-field>
+                  <mat-error *ngIf="id.touched && id.invalid">
+                    Укажите E-mail или номер телефона.
+                  </mat-error>
 
-              <mat-form-field>
-                <input
-                  matInput
-                  placeholder="Ваше отчество (при наличии)"
-                >
-              </mat-form-field>
+                  <mat-form-field>
+                    <input
+                      matInput
+                      [(ngModel)]="authModel.password"
+                      #passwordAuth="ngModel"
+                      name="password"
+                      placeholder="Пароль"
+                      type="password"
+                      minlength="6"
+                      maxlength="40"
+                      required
+                    >
+                  </mat-form-field>
+                  <mat-error *ngIf="passwordAuth.touched && passwordAuth.invalid">
+                    Укажите пароль.
+                  </mat-error>
+                </div>
 
-              <mat-form-field>
-                <input
-                  matInput
-                  type="email"
-                  placeholder="E-mail"
-                  required
-                >
-              </mat-form-field>
+                <mat-error *ngIf="loggingInError">
+                  {{loggingInError}}
+                </mat-error>
 
-              <mat-form-field>
-                <input
-                  matInput
-                  placeholder="Номер телефона"
-                  required
-                >
-              </mat-form-field>
+                <br>
+                <button
+                  type="submit"
+                  mat-raised-button
+                  color="accent"
+                  [disabled]="authForm.invalid"
+                >Войти</button>
+              </form>
+            </mat-card>
+          </mat-tab>
 
-              <mat-form-field>
-                <input
-                  matInput
-                  type="password"
-                  placeholder="Пароль"
-                  required
-                >
-              </mat-form-field>
-            </form>
+          <mat-tab label="Забыли пароль?">
+            <mat-card>
+              <mat-card-title>Восстановление пароля</mat-card-title>
+              <mat-card-subtitle>
+                Вы также можете
+                <a href="" (click)="setTabRegistration($event)">зарегистрироваться</a>
+                или
+                <a href="" (click)="setTabAuth($event)">войти в систему</a>
+              </mat-card-subtitle>
 
-            <button type="submit" mat-raised-button color="primary">Отправить</button>
-          </mat-card>
-        </mat-tab>
+              <form class="auth-form__form">
+                <mat-form-field>
+                  <input
+                    matInput
+                    placeholder="E-mail"
+                    required
+                  >
+                </mat-form-field>
+              </form>
 
-        <mat-tab label="Войти в систему">
-          <mat-card>
-            <mat-card-title>Вход в систему</mat-card-title>
-            <mat-card-subtitle>
-              Забыли пароль?
-              <a href="" (click)="setTabPasswordRecovery($event)">Восстановите его здесь</a>
-            </mat-card-subtitle>
-
-            <form class="auth-form__form">
-              <mat-form-field>
-                <input
-                  matInput
-                  placeholder="E-mail"
-                  required
-                >
-              </mat-form-field>
-
-              <mat-form-field>
-                <input
-                  matInput
-                  type="password"
-                  placeholder="Пароль"
-                  required
-                >
-              </mat-form-field>
-            </form>
-
-            <button type="submit" mat-raised-button color="primary">Отправить</button>
-          </mat-card>
-        </mat-tab>
-
-        <mat-tab label="Забыли пароль?">
-          <mat-card>
-            <mat-card-title>Восстановление пароля</mat-card-title>
-            <mat-card-subtitle>
-              Вы также можете
-              <a href="" (click)="setTabRegistration($event)">зарегистрироваться</a>
-              или
-              <a href="" (click)="setTabAuth($event)">войти в систему</a>
-            </mat-card-subtitle>
-
-            <form class="auth-form__form">
-              <mat-form-field>
-                <input
-                  matInput
-                  placeholder="E-mail"
-                  required
-                >
-              </mat-form-field>
-            </form>
-
-            <button type="submit" mat-raised-button color="primary">Отправить</button>
-          </mat-card>
-        </mat-tab>
-      </mat-tab-group>
+              <button
+                type="submit"
+                mat-raised-button
+                color="accent"
+              >Отправить</button>
+            </mat-card>
+          </mat-tab>
+        </mat-tab-group>
+      </mat-card>
     </div>
   </div>
 </section>
