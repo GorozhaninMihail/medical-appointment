@@ -32,6 +32,10 @@ const userOrdersQuery = `SELECT orders.date, orders.time, orders.status, mc.name
   WHERE orders.patient_id = $1
   ORDER BY orders.date DESC, orders.time DESC`;
 
+const SELECT_DUPLICATE_TIMESHEET_QUERY = `SELECT doctor_id, date, start FROM timesheet GROUP BY doctor_id, date, start HAVING count(*) > 1`;
+const SELECT_WRONG_ORDERS_QUERY = `SELECT mc_id, doctor_id, date FROM orders WHERE (mc_id, doctor_id, date, time) NOT IN (SELECT mc_id, doctor_id, date, start FROM timesheet)`;
+
+
 module.exports = {
   async getAllDoctors() {
     const doctorSelectResult = await sails.sendNativeQuery(
@@ -143,4 +147,14 @@ module.exports = {
 
     return orders.rows;
   },
+
+  async getDuplicateTimesheetRows() {
+    const timesheet = await sails.sendNativeQuery(SELECT_DUPLICATE_TIMESHEET_QUERY);
+    return timesheet.rows;
+  },
+
+  async getWrongOrderRows() {
+    const orders = await sails.sendNativeQuery(SELECT_WRONG_ORDERS_QUERY);
+    return orders.rows;
+  }
 };

@@ -6,6 +6,8 @@
  */
 /* global User */
 
+ let UserService = require('../services/UserService');
+
 module.exports = {
   async getAllUsers(req, res) {
     const userList = await User.find();
