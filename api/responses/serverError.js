@@ -3,5 +3,5 @@ module.exports = function serverError(err) {
 
   console.log(err);
 
-  return res.send('Упс, произошла непредвиденная ошибка. Свяжитесь с администратором сайта.');
+  return res.status(500).json('Упс, произошла непредвиденная ошибка. Свяжитесь с администратором сайта.');
 };

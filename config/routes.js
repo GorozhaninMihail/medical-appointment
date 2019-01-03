@@ -29,11 +29,14 @@ module.exports.routes = {
   'POST /api/v1/order': 'OrderController.postMakeOrder',
   'DELETE /api/v1/order': 'OrderController.deleteCancelOrder',
   'PUT /api/v1/order': 'OrderController.putChangeStatusOrder',
-  'GET /api/v1/orders': 'OrderController.getOrderList',
+  'GET /api/v1/order': 'OrderController.getOrderList',
 
   'POST /api/v1/online': 'OnlineController.postAddQuestion',
   'GET /api/v1/online': 'OnlineController.getAllQuestions',
   'GET /api/v1/online/:id': 'OnlineController.getQuestionInfo',
   'POST /api/v1/online/:id': 'OnlineController.postAddAnswer',
   'POST /api/v1/online/:id/close': 'OnlineController.postCloseQuestion',
+
+  'GET /api/v1/admin/stats': 'AdminController.getStats',
+  'POST /api/v1/admin/specialities': 'AdminController.postAddSpeciality',
 };

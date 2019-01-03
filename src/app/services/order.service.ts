@@ -1,13 +1,13 @@
 import {Injectable} from '@angular/core';
-import {ApiService} from './api.service';
-import {Observable} from 'rxjs';
-import {ClinicId, DoctorId} from '../models';
 import * as moment from 'moment';
+import {Observable} from 'rxjs';
+import {ApiService} from './api.service';
+import {IOrder, ClinicId, DoctorId} from '../models';
 
 @Injectable({
   providedIn: 'root',
 })
-export class AppointmentService {
+export class OrderService {
   constructor(private apiService: ApiService) {}
 
   makeAppointment(
@@ -24,6 +24,20 @@ export class AppointmentService {
       date: formattedDate,
       time,
       description,
+    });
+  }
+
+  getOrders(): Observable<IOrder[]> {
+    return this.apiService.get('/order');
+  }
+
+  changeOrderStatus(order: IOrder): Observable<any> {
+    return this.apiService.put('/order', {
+      clinicId: order.mc_id,
+      userId: order.user_id,
+      doctorId: order.doctor_id,
+      date: moment(order.date).format('YYYY-MM-DD'),
+      time: order.time,
     });
   }
 }

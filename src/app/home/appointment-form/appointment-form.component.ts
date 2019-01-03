@@ -1,8 +1,8 @@
 import {Component, OnInit, Inject, ChangeDetectorRef} from '@angular/core';
 import {MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef} from '@angular/material';
-import {IClinic, ClinicId} from 'src/app/models';
+import {IClinic, ClinicId, IDoctor} from 'src/app/models';
 import {DoctorsService} from 'src/app/services/doctors.service';
-import {AppointmentService} from 'src/app/services/appointment.service';
+import {OrderService} from 'src/app/services/order.service';
 
 @Component({
   selector: 'app-appointment-form',
@@ -11,11 +11,14 @@ import {AppointmentService} from 'src/app/services/appointment.service';
 })
 export class AppointmentFormComponent implements OnInit {
   constructor(
-    @Inject(MAT_BOTTOM_SHEET_DATA) public data: any,
+    @Inject(MAT_BOTTOM_SHEET_DATA) public data: {
+      doctor: IDoctor,
+      clinics: IClinic[],
+    },
     private bottomSheetRef: MatBottomSheetRef<AppointmentFormComponent>,
     private doctorService: DoctorsService,
-    private appointmentService: AppointmentService,
-    private ref: ChangeDetectorRef,
+    private orderService: OrderService,
+    private changeDetector: ChangeDetectorRef,
   ) {}
 
   private doctor: any;
@@ -71,7 +74,6 @@ export class AppointmentFormComponent implements OnInit {
   clinicChanged() {
     const {formModel, timesheet} = this;
     const {clinic} = formModel;
-    console.log('timesheet', timesheet[clinic]);
     const dates: number[] = Object.keys(timesheet[clinic])
       .map(key => Number(key));
     this.minDate = new Date(Math.min(...dates));
@@ -89,7 +91,7 @@ export class AppointmentFormComponent implements OnInit {
     const {doctor_id: doctorId} = this.doctor;
     const {clinic: clinicId, date, description, time} = this.formModel;
 
-    this.appointmentService.makeAppointment(
+    this.orderService.makeAppointment(
       Number(clinicId),
       doctorId,
       date,
@@ -98,13 +100,12 @@ export class AppointmentFormComponent implements OnInit {
     ).subscribe(
       () => {
         this.success = true;
-        this.ref.detectChanges();
+        this.changeDetector.detectChanges();
       },
       ({error}) => {
         this.error = error;
-        this.ref.detectChanges();
+        this.changeDetector.detectChanges();
       },
     );
   }
-
 }

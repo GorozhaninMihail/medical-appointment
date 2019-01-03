@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {ApiService} from './api.service';
 import {JwtService} from './jwt.service';
-import {Observable, of} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {Observable, BehaviorSubject} from 'rxjs';
+import {map, distinctUntilChanged} from 'rxjs/operators';
 import {IUser, IOrder} from '../models';
 
 @Injectable({
@@ -14,7 +14,10 @@ export class ProfileService {
     private jwtService: JwtService,
   ) {}
 
-  private currentUser: IUser | null = null;
+  private currentUserSubject = new BehaviorSubject<IUser>(null);
+  public currentUser = this.currentUserSubject
+    .asObservable()
+    .pipe(distinctUntilChanged());
 
   fetchCurrentUser(): void {
     if (this.jwtService.getToken()) {
@@ -28,13 +31,8 @@ export class ProfileService {
     }
   }
 
-  logOut(): void {
-    this.jwtService.unsetToken();
-    this.currentUser = null;
-  }
-
   setUser(user: IUser): void {
-    this.currentUser = user;
+    this.currentUserSubject.next(user);
   }
 
   register(
@@ -67,11 +65,12 @@ export class ProfileService {
     ));
   }
 
-  getCurrentUser(): IUser | null {
-    return this.currentUser;
+  logOut(): void {
+    this.jwtService.unsetToken();
+    this.currentUserSubject.next(null);
   }
 
-  getOrders(): Observable<IOrder[]> {
-    return this.apiService.get('/orders');
+  getCurrentUser(): IUser | null {
+    return this.currentUserSubject.value;
   }
 }

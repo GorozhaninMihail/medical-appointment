@@ -5,6 +5,7 @@
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
 /* global Clinic User Doctor */
+const OrderService = require('../services/OrderService');
 const DoctorService = require('../services/DoctorService');
 
 module.exports = {
@@ -41,7 +42,7 @@ module.exports = {
       return res.badRequest('Похоже, что выбранное вами время уже занято.');
     }
 
-    await DoctorService.createOrder({
+    await OrderService.createOrder({
       clinicId,
       doctorId,
       date,
@@ -68,7 +69,7 @@ module.exports = {
       return res.badRequest('Невозможно отменить данную консультацию.');
     }
 
-    const cancelQueryResult = await DoctorService.cancelOrder({
+    const cancelQueryResult = await OrderService.cancelOrder({
       clinicId,
       doctorId,
       date,
@@ -84,21 +85,27 @@ module.exports = {
   },
 
   async putChangeStatusOrder(req, res) {
-    const {clinicId, userId, doctorId, date, time, status} = req.body;
+    const {clinicId, userId, doctorId, date, time} = req.body;
 
-    if (!clinicId || !userId || !doctorId || !date || !time || !status) {
+    if (!clinicId || !userId || !doctorId || !date || !time) {
       return res.badRequest('Недостаточно данных.');
     }
 
-    const clinic = await Clinic.find({id: clinicId});
-    const user = await User.find({id: userId});
-    const doctor = await Doctor.find({id: doctorId});
+    const order = await OrderService.findOrder({
+      clinicId,
+      doctorId,
+      date,
+      time,
+      userId,
+    });
 
-    if (!clinic || !user || !doctor) {
-      return res.badRequest('Невозможно отменить данную консультацию.');
+    if (!order) {
+      return res.badRequest('Такая консультация не найдена.');
     }
 
-    const updateQueryResult = await DoctorService.changeOrderStatus({
+    const status = +!order.status;
+
+    const updateQueryResult = await OrderService.changeOrderStatus({
       status,
       clinicId,
       doctorId,
@@ -108,16 +115,24 @@ module.exports = {
     });
 
     if (!updateQueryResult.rowCount) {
-      return res.notFound('Невозможно изменить статус консультации на указанное вами.');
+      return res.badRequest('Невозможно изменить статус консультации на указанное вами.');
     }
 
-    return res.ok();
+    return res.send();
   },
 
   async getOrderList(req, res) {
-    const userId = req.user.id;
+    const {user} = req;
+    const {id: userId, role} = user;
 
-    const orders = await DoctorService.getUserOrders(userId);
+    let doctorId;
+
+    if (role === 'doctor') {
+      const doctorInfo = await Doctor.findOne({id: userId});
+      doctorId = doctorInfo.id;
+    }
+
+    const orders = await OrderService.getUserOrders(userId, doctorId);
 
     return res.json(orders);
   },
