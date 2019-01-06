@@ -1,0 +1,73 @@
+<section class="container">
+  <span *ngIf="question">
+    <div class="section">
+      <h1>Вопрос - "{{question.title}}"</h1>
+
+      <div
+        fxLayout="column"
+        fxLayoutGap="1rem"
+      >
+        <mat-card class="message">
+          {{question.text}}
+        </mat-card>
+
+        <mat-card
+          *ngFor="let message of messages"
+          class="message"
+          [ngClass]="{'message__shifted': message.userId !== question.userId}"
+        >
+          {{message.message}}
+        </mat-card>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Добавить ответ</h2>
+      <mat-card>
+        <p *ngIf="question.completed">Вопрос закрыт.</p>
+        <form
+          (ngSubmit)="addAnswer()"
+          #answerForm="ngForm"
+          *ngIf="!question.completed"
+        >
+          <mat-form-field>
+            <textarea
+              matInput
+              name="message"
+              [(ngModel)]="formModel.message"
+              #description="ngModel"
+              placeholder="Введите ответ..."
+              required
+            ></textarea>
+          </mat-form-field>
+          <mat-error *ngIf="description.touched && description.invalid">
+            Пожалуйста, введите сообщение.
+          </mat-error>
+
+          <mat-error *ngIf="error">
+            {{error}}
+          </mat-error>
+
+          <p
+            fxLayout="row"
+            fxLayoutAlign="space-between"
+            fxLayoutGap="1rem"
+          >
+            <button
+              mat-raised-button
+              type="submit"
+              color="accent"
+              [disabled]="answerForm.invalid"
+            >Отправить</button>
+            <button
+              mat-button
+              type="button"
+              color="warn"
+              (click)="closeQuestion()"
+            >Закрыть вопрос</button>
+          </p>
+        </form>
+      </mat-card>
+    </div>
+  </span>
+</section>

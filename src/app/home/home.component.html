@@ -49,15 +49,36 @@
     <h1>Специалиста в какой области вы ищите?</h1>
     <p>Просто выберите специальность и мы вам покажем всех врачей данного профиля и филиалы учреждений, где они принимают:</p>
 
-    <mat-chip-list>
-      <mat-chip
-        *ngFor="let speciality of specialities"
-        [selected]="selectedSpeciality === speciality.id"
-        (click)="toggleSpeciality(speciality.id)"
-      >
-        {{speciality.name}}
-      </mat-chip>
-    </mat-chip-list>
+    <p>
+      <mat-chip-list>
+        <mat-chip
+          *ngFor="let speciality of specialities"
+          [selected]="selectedSpeciality === speciality.id"
+          (click)="toggleSpeciality(speciality.id)"
+        >
+          {{speciality.name}}
+        </mat-chip>
+      </mat-chip-list>
+    </p>
+
+    <span *ngIf="selectedSpeciality">
+      <p>
+        Если вам нужно получить базовую консультацию, наши специалисты готовы помочь вам в режиме онлайн: кратко рассказать о том, что делать дальше и определиться с очной консультацией. Обратите внимание: <b>для постановки диагноза и назначения плана лечения следует записаться на очный прием к специалисту.</b>
+      </p>
+      <p>
+        Чтобы проконсультироваться онлайн по вашему вопросу с любым врачом выбранной специальности, нажмите на кнопку ниже или выберите конкретного врача и общем списке специалистов (справа).
+      </p>
+      <p>
+        <button
+          mat-raised-button
+          color="primary"
+          class="mat-button_action_select"
+          (click)="openConsultationForm(selectedSpeciality)"
+        >
+          Проконсультироваться онлайн (любой врач)
+        </button>
+      </p>
+    </span>
   </section>
 </div>
 
@@ -92,8 +113,9 @@
                   [color]="selectedClinic === clinic.id ? 'warn' : 'primary'"
                   class="mat-button_action_select"
                   (click)="toggleClinic(clinic.id)"
+                  [disabled]="!clinic.doctors.length"
                 >
-                  {{selectedClinic === clinic.id ? 'Скрыть врачей только из данной клиники' : 'Посмотреть ' + clinic.doctors.length + ' специалистов'}}
+                  {{selectedClinic === clinic.id ? 'Скрыть врачей только из данной клиники' : 'Принимают ' + clinic.doctors.length + ' специалистов'}}
                 </button>
               </p>
             </mat-card-content>
@@ -155,16 +177,27 @@
                   </span>
                 </p>
 
-                <p>
+                <p *ngIf="!doctor.clinics.length">Врач не будет принимать в ближайшее время или всё уже занято. Попробуйте онлайн-консультацию!</p>
+
+                <div fxLayout="row" fxLayoutGap="1em">
                   <button
                     mat-raised-button
                     color="accent"
                     class="mat-button_action_select"
                     (click)="openAppointmentForm(doctor)"
+                    [disabled]="!doctor.clinics.length"
                   >
                     Записаться на приём
                   </button>
-                </p>
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    class="mat-button_action_select"
+                    (click)="openConsultationForm(doctor.speciality_id, doctor)"
+                  >
+                    Онлайн-консультация
+                  </button>
+                </div>
               </mat-card-content>
             </mat-card>
             <br>

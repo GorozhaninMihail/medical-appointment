@@ -23,7 +23,9 @@ import {AuthComponent} from './auth/auth.component';
 import {JwtInterceptor} from './interceptors/jwt.interceptor.ts.service';
 
 import {AppointmentFormComponent} from './home/appointment-form/appointment-form.component';
-import { ProfileComponent } from './profile/profile.component';
+import {ProfileComponent} from './profile/profile.component';
+import {ConsultationFormComponent} from './home/consultation-form/consultation-form.component';
+import { QuestionComponent } from './question/question.component';
 
 @NgModule({
   declarations: [
@@ -33,6 +35,8 @@ import { ProfileComponent } from './profile/profile.component';
     AuthComponent,
     AppointmentFormComponent,
     ProfileComponent,
+    ConsultationFormComponent,
+    QuestionComponent,
   ],
   imports: [
     BrowserModule,
@@ -58,6 +62,7 @@ import { ProfileComponent } from './profile/profile.component';
   ],
   entryComponents: [
     AppointmentFormComponent,
+    ConsultationFormComponent,
   ],
   bootstrap: [AppComponent],
 })

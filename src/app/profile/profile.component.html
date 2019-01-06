@@ -1,17 +1,25 @@
 <section class="container">
   <div class="section">
-    <div *ngIf="userInfo()">
-      <h1>{{userInfo().firstName}} {{userInfo().lastName}}</h1>
+    <div *ngIf="!loaded">
+      Загрузка...
+    </div>
+    <div *ngIf="loaded">
+      <h1>{{user.lastName}} {{user.firstName}} {{user.middleName}}</h1>
+      <h4>{{role()}}</h4>
 
-      <mat-tab-group
-        [selectedIndex]="selectedTab"
-        (selectedIndexChange)="setTab($event)"
-      >
-        <mat-tab label="История записей">
-            <table mat-table [dataSource]="orders" class="mat-elevation-z8">
+      <mat-card>
+        <mat-tab-group
+          [selectedIndex]="selectedTab"
+          (selectedIndexChange)="setTab($event)"
+        >
+          <mat-tab label="История записей">
+            <br>
+            <p>Здесь вы можете просматрировать вашу историю очных консультаций со специалистами клиники.</p>
+
+            <table mat-table [dataSource]="orders">
               <ng-container matColumnDef="date">
                 <th mat-header-cell *matHeaderCellDef>Дата</th>
-                <td mat-cell *matCellDef="let element">{{element.date | date:"dd.MM.yyyy" }}</td>
+                <td mat-cell *matCellDef="let element">{{element.date | date:'dd.MM.yyyy' }}</td>
               </ng-container>
 
               <ng-container matColumnDef="time">
@@ -21,24 +29,132 @@
 
               <ng-container matColumnDef="doctor">
                   <th mat-header-cell *matHeaderCellDef>Врач</th>
-                  <td mat-cell *matCellDef="let element">{{element.last_name}} {{element.first_name[0]}}.{{element.middle_name[0]}}.</td>
+                  <td mat-cell *matCellDef="let element">
+                    {{element.last_name}} {{element.first_name[0]}}. {{element.middle_name[0]}}.
+                    <span
+                      *ngIf="element.doctor_id === user.id"
+                      class="important-text"
+                    >(вы)</span>
+                  </td>
                 </ng-container>
 
               <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>Статус</th>
-                <td mat-cell *matCellDef="let element">{{element.status}}</td>
+                <th mat-header-cell *matHeaderCellDef>Статус приёма</th>
+                <td mat-cell *matCellDef="let element">
+                  {{element.status === 0 ? 'Не состоялся' : 'Приём состоялся'}}
+                  <a
+                    *ngIf="element.doctor_id === user.id"
+                    [matTooltip]="'Нажмите, чтобы ' + (element.status === 0 ? 'отметить об успешном приёме' : 'отметить как несостоявшийся')"
+                    [matTooltipDisabled]="element.user_id !== user.id"
+                    (click)="changeOrderStatus(element)"
+                  >
+                    (изменить)
+                  </a>
+                </td>
               </ng-container>
 
               <ng-container matColumnDef="symbol">
                 <th mat-header-cell *matHeaderCellDef>Адрес</th>
-                <td mat-cell *matCellDef="let element">{{element.address}}</td>
+                <td mat-cell *matCellDef="let element">
+                  {{element.address}} ({{element.mc_name}})
+                </td>
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
               <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
             </table>
-        </mat-tab>
-      </mat-tab-group>
+          </mat-tab>
+
+          <mat-tab label="Онлайн-консультации">
+            <br>
+            <p>В данном разделе вы можете просматрировать отправленные вами вопросы врачам нашей клиники.</p>
+
+            <mat-list>
+              <mat-list-item *ngFor="let consultation of consultations; last as last">
+                <h1 mat-line>
+                  <b><a [routerLink]="['/question', consultation.consultation_id]">{{consultation.title}}</a></b>
+                </h1>
+                <p mat-line>{{consultation.text}}</p>
+                <p mat-line class="light-text">
+                  Задан {{consultation.time | date: 'dd.MM.yyyy HH:MM'}}
+                  <span *ngIf="user.role === 'doctor' && user.id === consultation.doctor_id" class="important-text">конкретно вам</span>
+                  <span *ngIf="user.role === 'doctor' && !consultation.doctor_id && user.id !== consultation.user_id" class="important-text">потенциально вам</span>
+                  <span *ngIf="user.role === 'doctor' && user.id === consultation.user_id">вами</span>
+                  • Направлен: {{getConsultationSubject(consultation)}}
+                  <span *ngIf="consultation.completed" class="important-text">• ЗАКРЫТ</span>
+                </p>
+                <mat-divider
+                  [inset]="true"
+                  *ngIf="!last"
+                ></mat-divider>
+              </mat-list-item>
+            </mat-list>
+          </mat-tab>
+
+          <mat-tab
+            *ngIf="user.role === 'admin'"
+            label="Администрирование"
+          >
+            <br>
+            <div
+              fxLayout="row"
+              fxLayoutAlign="space-between"
+              fxLayoutGap="1rem"
+            >
+              <div fxFlex="33%">
+                <h2>Статистика</h2>
+                <p>Всего консультаций: <b>{{stats.consultationsCount}}</b></p>
+                <p>Из них завершено: <b>{{stats.consultationsMade}}</b></p>
+                <p>Всего врачей: <b>{{stats.doctorsCount}}</b></p>
+                <p>Всего клиник: <b>{{stats.clinicsCount}}</b></p>
+                <p>Всего записей на приём: <b>{{stats.ordersCount}}</b></p>
+                <p>Из них завершённых: <b>{{stats.ordersCompleted}}</b></p>
+                <p>Всего специальностей: <b>{{stats.specialitiesCount}}</b></p>
+                <p>Всего зарегистрировано пациентов: <b>{{stats.userCount}}</b></p>
+              </div>
+              <div fxFlex="33%">
+                <h2>Добавить специальность</h2>
+                <form
+                  (ngSubmit)="addSpeciality()"
+                  #addSpecialityForm="ngForm"
+                >
+                  <mat-form-field>
+                    <input
+                      matInput
+                      name="name"
+                      [(ngModel)]="specialityName"
+                      #name="ngModel"
+                      placeholder="Название"
+                      minlength="3"
+                      autocomplete="off"
+                      required
+                    >
+                  </mat-form-field>
+                  <mat-error *ngIf="name.touched && name.invalid">
+                    Введите название специальности.
+                  </mat-error>
+
+                  <mat-error *ngIf="error">
+                    {{error}}
+                  </mat-error>
+
+                  <br>
+                  <p>
+                    <button
+                      mat-raised-button
+                      type="submit"
+                      color="accent"
+                      [disabled]="addSpecialityForm.invalid"
+                    >Добавить</button>
+                  </p>
+                </form>
+              </div>
+              <div fxFlex="33%">
+              </div>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </mat-card>
     </div>
   </div>
 </section>

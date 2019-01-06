@@ -1,0 +1,95 @@
+<h1>Онлайн-консультация</h1>
+
+<div *ngIf="success">
+  <p>Вы успешно задали вопрос!</p>
+  <p>
+    <a
+      routerLink="profile"
+      mat-raised-button
+      color="primary"
+      (click)="closeForm()"
+    >Перейти в личный кабинет</a>
+  </p>
+</div>
+
+<form
+  *ngIf="(doctor || speciality) && !success"
+  (ngSubmit)="addNewQuestion()"
+  #consultationForm="ngForm"
+>
+  <h2>Вы обращаетесь к</h2>
+  <mat-card>
+    <span *ngIf="doctor && speciality">
+      <mat-card-title>
+        {{doctor.last_name}} {{doctor.first_name}} {{doctor.middle_name}}
+      </mat-card-title>
+      <mat-card-subtitle>{{speciality.name}}</mat-card-subtitle>
+    </span>
+
+    <span *ngIf="!doctor && speciality">
+      <mat-card-title>
+        {{speciality.name}}
+      </mat-card-title>
+      <mat-card-subtitle>Любой врач</mat-card-subtitle>
+    </span>
+  </mat-card>
+
+  <h2>Ваш вопрос</h2>
+
+  <p>Обратите внимание, что в формате онлайн-консультации врач сможет ответить только на базовые вопросы или поможет подготовиться к очной консультации.</p>
+
+  <p>Большинство серьёзных вопросов могут быть решены только при очном приёме. Также напоминаем, что <b>для постановки диагноза и назначения плана лечения следует также записаться на очный прием к специалисту.</b></p>
+
+  <mat-form-field>
+    <input
+      matInput
+      name="title"
+      [(ngModel)]="formModel.title"
+      #title="ngModel"
+      placeholder="Суть вопроса"
+      minlength="3"
+      maxlength="50"
+      autocomplete="off"
+      required
+    >
+  </mat-form-field>
+  <mat-error *ngIf="title.touched && title.invalid">
+    Пожалуйста, укажите заголовок вопроса.
+  </mat-error>
+
+  <mat-form-field>
+    <textarea
+      matInput
+      name="description"
+      [(ngModel)]="formModel.message"
+      #description="ngModel"
+      placeholder="На что вы жалуетесь?"
+      required
+    ></textarea>
+  </mat-form-field>
+  <mat-error *ngIf="description.touched && description.invalid">
+    Пожалуйста, укажите ваш вопрос.
+  </mat-error>
+
+  <mat-error *ngIf="error">
+    {{error}}
+  </mat-error>
+
+  <p
+    fxLayout="row"
+    fxLayoutAlign="space-between"
+    fxLayoutGap="1rem"
+  >
+    <button
+      mat-raised-button
+      type="submit"
+      color="accent"
+      [disabled]="consultationForm.invalid"
+    >Отправить сообщение</button>
+    <button
+      mat-button
+      color="warn"
+      (click)="closeForm()"
+    >Отменить и закрыть окно</button>
+  </p>
+</form>

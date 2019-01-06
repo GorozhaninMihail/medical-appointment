@@ -12,7 +12,7 @@
     >SuperMed</a>
 
     <span
-      *ngIf="currentUser()"
+      *ngIf="user"
       fxLayout="row"
       fxLayoutGap="1em"
     >
@@ -21,7 +21,7 @@
         color="white"
         routerLink="profile"
       >
-        {{currentUser().firstName}} {{currentUser().lastName}}
+        {{user.firstName}} {{user.lastName}}
       </a>
       <a
         routerLink="/"
@@ -39,7 +39,7 @@
       </a>
     </span>
 
-    <span *ngIf="!currentUser()">
+    <span *ngIf="!user && !loading">
       <a
         routerLink="auth"
         mat-flat-button

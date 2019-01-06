@@ -1,44 +1,37 @@
+/* eslint-disable camelcase */
 /**
  * OnlineController
  *
  * @description :: Server-side actions for handling incoming requests.
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
-/* global sails Speciality Doctor User Consultation */
+/* global sails Speciality Doctor Consultation Message */
 
+const moment = require('moment');
+const _ = require('lodash');
 const QuestionsService = require('../services/QuestionsService');
 
 module.exports = {
   async postAddQuestion(req, res) {
-    const {userId, title, text, doctorId, specialityId} = req.body;
+    const {title, message, doctorId, specialityId} = req.body;
 
-    if (!userId || !title || !text) {
+    if (!title || !message) {
       return res.badRequest('Укажите заголовок и текст вашего вопроса.');
     }
 
-    // TODO
-    const user = await User.find({id: userId});
-    if (!user) {
-      return res.badRequest('User not found.');
-    }
+    const userId = req.user.id;
 
     if (!doctorId && !specialityId) {
-      return res.badRequest("You should send either 'doctor_id' or 'speciality_id' parameter.");
-    }
-
-    if (!doctorId && !specialityId) {
-      return res.badRequest("You cannot specify both 'doctor_id' and 'speciality_id' parameters.");
+      return res.badRequest('Некорректные данные');
     }
 
     if (doctorId) {
       const doctor = await Doctor.findOne({id: doctorId});
 
-      if (!doctor.length) {
+      if (!doctor) {
         return res.badRequest('Данный врач не найден.');
       }
-    }
-
-    if (specialityId) {
+    } else if (specialityId) {
       const speciality = await Speciality.findOne({id: specialityId});
 
       if (!speciality) {
@@ -46,92 +39,91 @@ module.exports = {
       }
     }
 
-    await QuestionsService.createNewQuestion({userId, doctorId, specialityId, title, text});
+    await QuestionsService.createNewQuestion({
+      userId,
+      doctorId,
+      specialityId,
+      title,
+      text: message,
+    });
 
-    return res.sendStatus(201);
+    return res.status(201).send();
   },
 
   async getAllQuestions(req, res) {
-    const {userId, doctorId} = req.query;
+    const {role, id} = req.user;
 
-    if (!userId && !doctorId) {
-      return res.send({});
+    let questions = [];
+
+    if (role === 'doctor') {
+      const doctor = await Doctor.findOne({id});
+
+      const questionsForDoctor = await QuestionsService.getQuestionsForDoctor(id, doctor);
+
+      questions.push(...questionsForDoctor);
     }
 
-    let questions;
+    const questionsByUser = await QuestionsService.getQuestionsForUser(id);
 
-    if (userId) {
-      const user = await User.findOne({id: userId});
+    questions.push(...questionsByUser);
 
-      if (!user) {
-        return res.send({});
-      }
-
-      questions = await QuestionsService.getQuestionsForUser(userId);
-    } else if (doctorId) {
-      const doctor = await Doctor.findOne({id: doctorId});
-
-      if (!doctor) {
-        return res.send({});
-      }
-
-      questions = await QuestionsService.getQuestionsForDoctor(
-        doctorId,
-        doctor,
-      );
-    }
+    questions = _.uniqWith(questions, _.isEqual);
 
     return res.json(questions);
   },
 
   async postCloseQuestion(req, res) {
+    const {user} = req;
+
     const questionId = req.params.id;
 
     if (!questionId) {
       return res.badRequest('Некорректно указан номер вопроса.');
     }
 
-    const closeResult = await QuestionsService.closeQuestion(questionId, 1); // Заменить 1 на userID
+    const question = await Consultation.findOne({id: questionId});
 
-    if (!closeResult.rowCount) {
-      return res.badRequest('Такой вопрос не найден.');
+    if (!question
+      || !(await QuestionsService.checkPermissions(user, question))
+      || question.completed) {
+      return res.badRequest('Вы не можете закрыть данный вопрос.');
     }
 
-    return res.ok();
+    await QuestionsService.closeQuestion(questionId);
+
+    return res.status(200).send();
   },
 
   async postAddAnswer(req, res) {
+    const {user} = req;
+    const {id: userId} = user;
     const questionId = req.params.id;
-    const {userId, message} = req.body;
+    const {message} = req.body;
 
-    if (!questionId || !userId || !message) {
+    if (!questionId || !message) {
       return res.badRequest('Отсутствует сообщение.');
     }
 
     let question = await Consultation.findOne({id: questionId});
 
-    if (!question) {
-      return res.badRequest('Данная консультация не существует.');
+    if (!question
+      || !(await QuestionsService.checkPermissions(user, question))
+      || question.completed) {
+      return res.badRequest('Вы не можете добавить ответ на данный вопрос.');
     }
 
-    if (question.completed) {
-      return res.badRequest('Данная консультация закрыта, поэтому ответ на неё добавить невозможно.');
-    }
+    const result = await Message.create({
+      consultationId: questionId,
+      userId,
+      time: moment.utc().format(),
+      message,
+    }).fetch();
 
-    // const user = await User.findOne({id: userId});
-
-    // TODO
-    // if (!user) {
-    //   return res.notFound(`User with ID ${body.userID} is not found.`);
-    // }
-
-    // TODO
-    // await QuestionsService.addAnswerToQuestion(questionId, body);
-
-    return res.sendStatus(201);
+    return res.json(result);
   },
 
   async getQuestionInfo(req, res) {
+    const {user} = req;
     const questionId = req.params.id;
 
     const question = await Consultation.findOne({id: questionId});
@@ -140,13 +132,24 @@ module.exports = {
       return res.badRequest('Данная консультация не найдена.');
     }
 
-    const selectQuestionQuery = 'SELECT * FROM consultations WHERE consultation_id = $1';
+    if (!(await QuestionsService.checkPermissions(user, question))) {
+      return res.badRequest('Вы не можете просматривать данный вопрос.');
+    }
 
     const selectMessagesQuery = 'SELECT * FROM messages WHERE consultation_id = $1 ORDER BY time';
 
+    const messages = (await sails.sendNativeQuery(
+      selectMessagesQuery,
+      [questionId],
+    )).rows.map(({consultation_id, user_id, ...rest}) => ({
+      consultationId: consultation_id,
+      userId: user_id,
+      ...rest,
+    }));
+
     const questionInfo = {
-      question: (await sails.sendNativeQuery(selectQuestionQuery, [questionId])).rows[0],
-      messages: (await sails.sendNativeQuery(selectMessagesQuery, [questionId])).rows,
+      question,
+      messages,
     };
 
     return res.json(questionInfo);

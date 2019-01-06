@@ -16,18 +16,18 @@ module.exports = {
       autoIncrement: true,
     },
 
-    userID: {
+    userId: {
       columnName: 'user_id',
       type: 'number',
     },
 
-    doctorID: {
+    doctorId: {
       columnName: 'doctor_id',
       type: 'number',
       allowNull: true,
     },
 
-    specialityID: {
+    specialityId: {
       type: 'number',
       columnName: 'specialist_id',
       allowNull: true,

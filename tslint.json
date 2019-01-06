@@ -14,6 +14,7 @@
     "ter-arrow-parens": false,
     "no-this-assignment": false,
     "object-shorthand-properties-first": false,
+    "prefer-const": false,
 
     // Vanilla TSLint Angular rules
     "arrow-return-shorthand": true,
@@ -96,7 +97,6 @@
       "check-else",
       "check-whitespace"
     ],
-    "prefer-const": true,
     "quotemark": [
       true,
       "single"

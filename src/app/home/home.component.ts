@@ -7,6 +7,7 @@ import {DoctorsService} from '../services/doctors.service';
 import {ProfileService} from '../services/profile.service';
 import {AppointmentFormComponent} from './appointment-form/appointment-form.component';
 import {Router} from '@angular/router';
+import { ConsultationFormComponent } from './consultation-form/consultation-form.component';
 
 @Component({
   selector: 'app-home',
@@ -111,6 +112,10 @@ export class HomeComponent implements OnInit {
     return this.clinics.find(clinic => clinic.id === clinicId);
   }
 
+  getSpecialityById(specialityId: SpecialityId): ISpeciality {
+    return this.specialities.find(spec => spec.id === specialityId);
+  }
+
   selectedDoctorsHeader(): string {
     if (this.selectedClinic) {
       return 'Врачи, принимающие тут';
@@ -133,6 +138,19 @@ export class HomeComponent implements OnInit {
         data: {
           doctor,
           clinics: this.clinics,
+        },
+      });
+    } else {
+      this.router.navigateByUrl('/auth');
+    }
+  }
+
+  openConsultationForm(speciality: SpecialityId, doctor?: IDoctor): void {
+    if (this.isLogged()) {
+      this.bottomSheet.open(ConsultationFormComponent, {
+        data: {
+          speciality: this.getSpecialityById(speciality),
+          doctor,
         },
       });
     } else {
