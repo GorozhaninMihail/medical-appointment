@@ -29,5 +29,10 @@ module.exports = {
       type: 'string',
       allowNull: true,
     },
+
+    active: {
+      type: 'boolean',
+      defaultsTo: true,
+    },
   },
 };

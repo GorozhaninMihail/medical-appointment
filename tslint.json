@@ -9,6 +9,7 @@
   "rules": {
     // ESLint rules
     "object-curly-spacing": [true, "never"],
+    "import-name": false,
 
     // Overrided
     "ter-arrow-parens": false,

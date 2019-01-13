@@ -24,6 +24,7 @@
         {{user.firstName}} {{user.lastName}}
       </a>
       <a
+        *ngIf="!mainPage"
         routerLink="/"
         mat-flat-button
         color="accent"
@@ -31,8 +32,8 @@
         Записаться на приём
       </a>
       <a
-        mat-stroked-button
-        color="accent"
+        mat-flat-button
+        color="warn"
         (click)="logout()"
       >
         Выйти

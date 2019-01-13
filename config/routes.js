@@ -20,11 +20,10 @@ module.exports.routes = {
   'PUT /api/v1/clinics/:id': 'ClinicController.putUpdateClinicInfo',
 
   'GET /api/v1/users/all': 'UserController.getAllUsers',
-  // 'GET /users/:name': 'UserController.getUsersByName',
 
   'GET /api/v1/doctors': 'DoctorController.getAllDoctors',
   'GET /api/v1/doctors/:id': 'DoctorController.getDoctorInfo',
-  // 'GET /api/v1/doctors': 'DoctorController.findDoctors',
+  'POST /api/v1/doctors/:id': 'DoctorController.postAddOrUpdateDoctor',
 
   'POST /api/v1/order': 'OrderController.postMakeOrder',
   'DELETE /api/v1/order': 'OrderController.deleteCancelOrder',
@@ -38,5 +37,8 @@ module.exports.routes = {
   'POST /api/v1/online/:id/close': 'OnlineController.postCloseQuestion',
 
   'GET /api/v1/admin/stats': 'AdminController.getStats',
+  'POST /api/v1/admin/timesheet': 'AdminController.postAddTimesheetRecord',
   'POST /api/v1/admin/specialities': 'AdminController.postAddSpeciality',
+  'POST /api/v1/admin/specialities/delete': 'AdminController.postDeleteSpeciality',
+  'GET /api/v1/admin/specialities': 'AdminController.getAllSpecialities',
 };

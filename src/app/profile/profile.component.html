@@ -5,7 +5,7 @@
     </div>
     <div *ngIf="loaded">
       <h1>{{user.lastName}} {{user.firstName}} {{user.middleName}}</h1>
-      <h4>{{role()}}</h4>
+      <h3>{{role()}}</h3>
 
       <mat-card>
         <mat-tab-group
@@ -80,8 +80,10 @@
                   <span *ngIf="user.role === 'doctor' && user.id === consultation.doctor_id" class="important-text">конкретно вам</span>
                   <span *ngIf="user.role === 'doctor' && !consultation.doctor_id && user.id !== consultation.user_id" class="important-text">потенциально вам</span>
                   <span *ngIf="user.role === 'doctor' && user.id === consultation.user_id">вами</span>
-                  • Направлен: {{getConsultationSubject(consultation)}}
-                  <span *ngIf="consultation.completed" class="important-text">• ЗАКРЫТ</span>
+                  · Направлен: {{getConsultationSubject(consultation)}}
+                  <span *ngIf="consultation.completed">
+                    · <span class="important-text">Закрыт</span>
+                  </span>
                 </p>
                 <mat-divider
                   [inset]="true"
@@ -102,40 +104,162 @@
               fxLayoutGap="1rem"
             >
               <div fxFlex="33%">
-                <h2>Статистика</h2>
-                <p>Всего консультаций: <b>{{stats.consultationsCount}}</b></p>
-                <p>Из них завершено: <b>{{stats.consultationsMade}}</b></p>
-                <p>Всего врачей: <b>{{stats.doctorsCount}}</b></p>
-                <p>Всего клиник: <b>{{stats.clinicsCount}}</b></p>
-                <p>Всего записей на приём: <b>{{stats.ordersCount}}</b></p>
-                <p>Из них завершённых: <b>{{stats.ordersCompleted}}</b></p>
-                <p>Всего специальностей: <b>{{stats.specialitiesCount}}</b></p>
-                <p>Всего зарегистрировано пациентов: <b>{{stats.userCount}}</b></p>
+                <h2>Добавить или редактировать врача</h2>
+                <p id="edit-doctor-text">Чтобы отредактировать информацию о враче, также вводите ID соответствующего пользователя и новые данные (для простоты используйте кнопку "Редактировать" в списке врачей). <b>При редактировании информации изменение специальности ни на что не влияет.</b></p>
+
+                <form
+                  (ngSubmit)="addOrChangeDoctor()"
+                  #addDoctorForm="ngForm"
+                >
+                  <div fxLayout="column">
+                    <mat-form-field>
+                      <input
+                        matInput
+                        name="userid"
+                        [(ngModel)]="doctorToAdd.id"
+                        #userId="ngModel"
+                        placeholder="ID пользователя"
+                        pattern="^[1-9]\d*$"
+                        autocomplete="off"
+                        required
+                      >
+                    </mat-form-field>
+                    <mat-error *ngIf="userId.touched && userId.invalid">
+                      Введите цифровой ID пользователя (пример: 57).
+                    </mat-error>
+
+                    <mat-form-field>
+                      <mat-select
+                        class="form-element"
+                        placeholder="Выберите специальность"
+                        [(value)]="doctorToAdd.specialityId"
+                        required
+                      >
+                        <mat-option
+                          *ngFor="let speciality of adminData.specialities"
+                          [value]="speciality.id"
+                        >
+                          {{speciality.name}}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    <br>
+
+                    <mat-form-field>
+                      <input
+                        matInput
+                        type="number"
+                        name="doctorexp"
+                        [(ngModel)]="doctorToAdd.experience"
+                        #doctorExp="ngModel"
+                        placeholder="Стаж"
+                        autocomplete="off"
+                        min="1"
+                        max="50"
+                        required
+                      >
+                    </mat-form-field>
+                    <mat-error *ngIf="doctorExp.touched && doctorExp.invalid">
+                      Укажите стаж врача (от 1 года до 50 лет).
+                    </mat-error>
+
+                    <mat-form-field>
+                      <textarea
+                        matInput
+                        name="information"
+                        [(ngModel)]="doctorToAdd.information"
+                        #information="ngModel"
+                        placeholder="Информация о враче"
+                        minlength="10"
+                        maxlength="300"
+                      ></textarea>
+                    </mat-form-field>
+                    <mat-error *ngIf="information.touched && information.invalid">
+                      Пожалуйста, введите информацию о докторе (10-300 символов) или оставьте поле пустым.
+                    </mat-error>
+
+                    <div>
+                      <mat-checkbox
+                        name="doctoractive"
+                        [(ngModel)]="doctorToAdd.active"
+                        color="primary"
+                      >
+                        Врач в данный момент работает
+                      </mat-checkbox>
+                    </div>
+                  </div>
+
+                  <mat-error *ngIf="addDoctorError">
+                    {{addDoctorError}}
+                  </mat-error>
+
+                  <br>
+                  <p>
+                    <button
+                      mat-raised-button
+                      type="submit"
+                      color="accent"
+                      [disabled]="addDoctorForm.invalid"
+                    >Отправить</button>
+                  </p>
+                </form>
+
+                <br>
+                <h2>Список врачей</h2>
+                <ng-container *ngFor="let doctor of doctors">
+                  <p>
+                    <b>{{doctor | userFio}}</b>
+                    ({{doctor.speciality | lowercase }})
+                    <ng-container *ngIf="!doctor.active">
+                      · <span class="important-text">Сейчас не врач</span>
+                    </ng-container>
+                    <ng-container *ngIf="doctor.doctor_id === doctorToAdd.id">
+                      · <span class="important-text">Сейчас редактируется</span>
+                    </ng-container>
+                  </p>
+                  <p>
+                    <a (click)="openTimesheetForm(doctor)">Изм. время работы</a>
+                    ·
+                    <a
+                      routerLink="."
+                      fragment="edit-doctor-text"
+                      (click)="chooseDoctorForEdit(doctor)"
+                    >Редактировать</a>
+                  </p>
+                  <br>
+                </ng-container>
               </div>
               <div fxFlex="33%">
-                <h2>Добавить специальность</h2>
+                <h2>Управление специальностями</h2>
+                <h3>Добавить новую специальность</h3>
                 <form
                   (ngSubmit)="addSpeciality()"
                   #addSpecialityForm="ngForm"
                 >
-                  <mat-form-field>
-                    <input
-                      matInput
-                      name="name"
-                      [(ngModel)]="specialityName"
-                      #name="ngModel"
-                      placeholder="Название"
-                      minlength="3"
-                      autocomplete="off"
-                      required
-                    >
-                  </mat-form-field>
-                  <mat-error *ngIf="name.touched && name.invalid">
-                    Введите название специальности.
-                  </mat-error>
+                  <div
+                    fxLayout="column"
+                    fxFlexFill
+                  >
+                    <mat-form-field>
+                      <input
+                        matInput
+                        name="name"
+                        [(ngModel)]="specialityName"
+                        #name="ngModel"
+                        placeholder="Название специальности"
+                        minlength="3"
+                        maxlength="50"
+                        autocomplete="off"
+                        required
+                      >
+                    </mat-form-field>
+                    <mat-error *ngIf="name.touched && name.invalid">
+                      Введите название специальности (3-50 символов)
+                    </mat-error>
+                  </div>
 
-                  <mat-error *ngIf="error">
-                    {{error}}
+                  <mat-error *ngIf="addSpecialityError">
+                    {{addSpecialityError}}
                   </mat-error>
 
                   <br>
@@ -148,8 +272,33 @@
                     >Добавить</button>
                   </p>
                 </form>
+
+                <h2>Список специальностей</h2>
+                <p *ngFor="let speciality of adminData.specialities">
+                  {{speciality.name}}
+                  · Врачей: {{countDoctorsBySpeciality(speciality.id)}}
+                  <a
+                    *ngIf="!countDoctorsBySpeciality(speciality.id)"
+                    (click)="deleteSpeciality(speciality.id)"
+                  >
+                    · Удалить
+                  </a>
+                </p>
               </div>
               <div fxFlex="33%">
+                <h2>Статистика</h2>
+                <p>Всего консультаций: <b>{{adminData.stats.consultationsCount}}</b></p>
+                <p>Из них завершено: <b>{{adminData.stats.consultationsMade}}</b></p>
+                <br>
+                <p>Всего врачей: <b>{{adminData.stats.doctorsCount}}</b></p>
+                <p>Всего специальностей: <b>{{adminData.stats.specialitiesCount}}</b></p>
+                <br>
+                <p>Всего клиник: <b>{{adminData.stats.clinicsCount}}</b></p>
+                <br>
+                <p>Всего записей на приём: <b>{{adminData.stats.ordersCount}}</b></p>
+                <p>Из них завершённых: <b>{{adminData.stats.ordersCompleted}}</b></p>
+                <br>
+                <p>Всего зарегистрировано пациентов: <b>{{adminData.stats.userCount}}</b></p>
               </div>
             </div>
           </mat-tab>
