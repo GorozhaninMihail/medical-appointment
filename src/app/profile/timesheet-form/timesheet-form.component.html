@@ -55,14 +55,18 @@
       ></mat-datepicker>
     </mat-form-field>
 
-    <h2>Время</h2>
+    <h2>Время в формате XX:YY</h2>
+    <p>
+      Вы можете указать несколько вариантов через запятую.<br>
+      Все недопустимые варианты и повторы <b>будут проигнорированы</b>.
+    </p>
     <mat-form-field>
       <input
         matInput
         name="time"
         [(ngModel)]="formModel.time"
         #time="ngModel"
-        placeholder="Время"
+        placeholder="Пример: 08:00,09:30,10:00,12:30,14:15,15:00"
         autocomplete="off"
         required
       >
@@ -75,6 +79,10 @@
       {{error}}
     </mat-error>
   </div>
+
+  <p *ngIf="result">
+    {{result}}
+  </p>
 
   <p
     fxLayout="row"

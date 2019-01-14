@@ -90,7 +90,9 @@ export class ProfileComponent implements OnInit {
       }),
     ).subscribe(([orders, consultations, doctors, ...adminData]) => {
       this.orders = orders;
-      this.consultations = consultations;
+      this.consultations = (consultations as IConsultation[])
+        .sort((c1, c2) => new Date(c2.time).getTime()
+          - new Date(c1.time).getTime());
       this.doctors = doctors;
 
       const [stats, specialities, clinics] = adminData;
