@@ -1,4 +1,4 @@
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, Inject, OnInit, ChangeDetectorRef} from '@angular/core';
 import {MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef} from '@angular/material';
 import {IDoctor, IClinic} from 'src/app/models';
 import {AdminService} from 'src/app/services/admin.service';
@@ -16,6 +16,7 @@ export class TimesheetFormComponent implements OnInit {
     },
     private bottomSheetRef: MatBottomSheetRef<TimesheetFormComponent>,
     private adminService: AdminService,
+    private changeDetector: ChangeDetectorRef,
   ) {}
 
   private doctor: any;
@@ -23,7 +24,9 @@ export class TimesheetFormComponent implements OnInit {
 
   private currentDate = new Date();
 
+  // Form
   private error: string;
+  private result: string;
   private formModel = {
     clinic: '',
     date: '',
@@ -47,14 +50,18 @@ export class TimesheetFormComponent implements OnInit {
       time,
     ).subscribe(
       result => {
-        console.log(result);
-        // this.success = true;
-        // this.changeDetector.detectChanges();
+        this.result = result;
+        this.error = '';
+        this.formModel = {
+          clinic: '',
+          date: '',
+          time: '',
+        };
+        this.changeDetector.detectChanges();
       },
       ({error}) => {
-        console.log(error);
         this.error = error;
-        // this.changeDetector.detectChanges();
+        this.changeDetector.detectChanges();
       },
     );
   }

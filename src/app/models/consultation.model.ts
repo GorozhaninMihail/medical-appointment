@@ -11,6 +11,6 @@ export interface IConsultation {
   specialist_id: SpecialityId;
   title: string;
   text: string;
-  time: Date;
+  time: string;
   user_id: UserId;
 }

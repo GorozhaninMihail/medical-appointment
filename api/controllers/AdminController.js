@@ -4,8 +4,9 @@
  * @description :: Server-side actions for handling incoming requests.
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
-/* global sails Speciality Doctor */
-const {format, parse, isAfter, isSameDay} = require('date-fns');
+/* global sails Speciality Doctor Clinic */
+const {format, parse, isAfter} = require('date-fns');
+const uniq = require('lodash/uniq');
 
 module.exports = {
   async getStats(req, res) {
@@ -111,19 +112,81 @@ module.exports = {
   },
 
   async postAddTimesheetRecord(req, res) {
-    const {doctorId, clinicId, time} = req.body;
+    const {doctorId, clinicId, time, date: rawDate} = req.body;
 
-    const date = parse(+req.body.date);
+    if (!doctorId) {
+      return res.badRequest('Укажите врача.');
+    }
 
-    // if (isAfter(new Date(), date)
-    //   || isSameDay(new Date(), date)) {
-    //   return res.badRequest('Это время уже прошло.');
-    // }
+    if (!clinicId) {
+      return res.badRequest('Выберите клинику.');
+    }
+
+    if (!rawDate || !time) {
+      return res.badRequest('Укажите дату и время.');
+    }
+
+    const doctor = await Doctor.findOne({
+      id: doctorId,
+      active: true,
+    });
+
+    if (!doctor) {
+      return res.badRequest('Такой врач не найден, или в данный момент он не работает в клинике.');
+    }
+
+    const clinic = await Clinic.findOne({
+      id: clinicId,
+    });
+
+    if (!clinic) {
+      return res.badRequest('Такая клиника не найдена.');
+    }
+
+    const date = parse(+rawDate);
+
+    const timeRegex = /([0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]/;
+
+    let times = uniq(
+      time
+        .split(',')
+        .filter(t => t.trim().match(timeRegex)),
+    ).filter(t => {
+      const [hours, mins] = t.split(':');
+      date.setHours(+hours);
+      date.setMinutes(+mins);
+      return isAfter(date, new Date());
+    });
 
     const formattedDate = format(date, 'YYYY-MM-DD');
 
-    const result = await sails.sendNativeQuery('INSERT INTO timesheet (doctor_id, mc_id, date, start) VALUES($1, $2, $3, $4)', [doctorId, clinicId, formattedDate, time]);
+    const busyTime = (await Promise.all(
+      times.map(t => sails.sendNativeQuery(
+        'SELECT * FROM timesheet WHERE doctor_id = $1 AND mc_id = $2 AND date = $3 AND start = $4',
+        [doctorId, clinicId, formattedDate, t],
+      )),
+    )).map(result => !!result.rowCount);
 
-    return res.json(result);
+    const freeTime = times.filter((t, i) => !busyTime[i]);
+
+    if (!freeTime.length) {
+      return res.badRequest('Не введено ни одной корректной даты.');
+    }
+
+    await Promise.all(
+      times.map((t, i) => {
+        const promise = busyTime[i]
+          ? Promise.resolve()
+          : sails.sendNativeQuery(
+            'INSERT INTO timesheet (doctor_id, mc_id, date, start) VALUES($1, $2, $3, $4)',
+            [doctorId, clinicId, formattedDate, t],
+          );
+        return promise;
+      }),
+    );
+
+    const addedTimes = freeTime.join(', ');
+
+    return res.json(`Добавлено следующее время: ${addedTimes}`);
   },
 };
