@@ -1,0 +1,96 @@
+<h1>Добавление времени работы врача</h1>
+
+<form
+  (ngSubmit)="addNewRecord()"
+  #timesheetForm="ngForm"
+>
+  <h2>Врач</h2>
+  <mat-card>
+    <span>
+      <mat-card-title>
+        {{doctor | userFio}}
+      </mat-card-title>
+      <mat-card-subtitle>{{doctor.speciality}}</mat-card-subtitle>
+    </span>
+  </mat-card>
+
+
+  <div fxLayout="column">
+    <h2>Выберите филиал</h2>
+    <mat-form-field>
+      <mat-select
+        placeholder="Выберите филиал"
+        [(value)]="formModel.clinic"
+        required
+      >
+        <mat-option
+          *ngFor="let clinic of clinics"
+          [value]="clinic.id"
+        >
+          {{clinic.name}} ({{clinic.address}})
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <h2>Выберите дату приёма</h2>
+    <mat-form-field>
+      <input
+        matInput
+        [matDatepicker]="picker"
+        [(ngModel)]="formModel.date"
+        [min]="currentDate"
+        name="date"
+        placeholder="Выберите дату"
+        disabled
+        required
+      >
+      <mat-datepicker-toggle
+        matSuffix
+        [for]="picker"
+      ></mat-datepicker-toggle>
+      <mat-datepicker
+        touchUi
+        #picker
+        [disabled]="false"
+      ></mat-datepicker>
+    </mat-form-field>
+
+    <h2>Время</h2>
+    <mat-form-field>
+      <input
+        matInput
+        name="time"
+        [(ngModel)]="formModel.time"
+        #time="ngModel"
+        placeholder="Время"
+        autocomplete="off"
+        required
+      >
+    </mat-form-field>
+    <mat-error *ngIf="time.touched && time.invalid">
+      Пожалуйста, укажите время.
+    </mat-error>
+
+    <mat-error *ngIf="error">
+      {{error}}
+    </mat-error>
+  </div>
+
+  <p
+    fxLayout="row"
+    fxLayoutAlign="space-between"
+    fxLayoutGap="1rem"
+  >
+    <button
+      mat-raised-button
+      type="submit"
+      color="accent"
+      [disabled]="timesheetForm.invalid"
+    >Отправить</button>
+    <button
+      mat-button
+      color="warn"
+      (click)="closeForm()"
+    >Отменить и закрыть окно</button>
+  </p>
+</form>

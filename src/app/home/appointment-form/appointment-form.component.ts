@@ -3,6 +3,7 @@ import {MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef} from '@angular/material';
 import {IClinic, ClinicId, IDoctor} from 'src/app/models';
 import {DoctorsService} from 'src/app/services/doctors.service';
 import {OrderService} from 'src/app/services/order.service';
+import {isSameDay} from 'date-fns';
 
 @Component({
   selector: 'app-appointment-form',
@@ -39,6 +40,8 @@ export class AppointmentFormComponent implements OnInit {
     description: '',
   };
 
+  private isDateAppropriate: ((date: Date) => boolean) = () => true;
+
   ngOnInit() {
     const {doctor, clinics} = this.data;
     this.doctor = doctor;
@@ -47,6 +50,7 @@ export class AppointmentFormComponent implements OnInit {
     this.doctorService.getById(this.doctor.doctor_id)
       .subscribe(doctorInfo => {
         const {timesheet} = this;
+
         doctorInfo.timesheet.forEach(({mc_id, date, start}) => {
           if (!timesheet[mc_id]) {
             timesheet[mc_id] = {};
@@ -74,10 +78,18 @@ export class AppointmentFormComponent implements OnInit {
   clinicChanged() {
     const {formModel, timesheet} = this;
     const {clinic} = formModel;
+
     const dates: number[] = Object.keys(timesheet[clinic])
-      .map(key => Number(key));
+      .map(currDate => +currDate);
     this.minDate = new Date(Math.min(...dates));
     this.maxDate = new Date(Math.max(...dates));
+
+    this.isDateAppropriate = d => {
+      const result = dates
+        .map(currDate => isSameDay(new Date(d), currDate))
+        .some(currDate => currDate);
+      return result;
+    };
   }
 
   dateChanged() {
