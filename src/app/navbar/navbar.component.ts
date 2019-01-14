@@ -1,7 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {ProfileService} from '../services/profile.service';
 import {IUser} from '../models';
-import { Router } from '@angular/router';
+import {Router, NavigationEnd} from '@angular/router';
+import {filter} from 'rxjs/operators';
 
 @Component({
   selector: 'app-navbar',
@@ -14,6 +15,7 @@ export class NavbarComponent implements OnInit {
     private router: Router,
   ) {}
 
+  private mainPage: boolean;
   private loading = true;
   private user: IUser;
 
@@ -22,6 +24,12 @@ export class NavbarComponent implements OnInit {
       this.user = user;
       this.loading = false;
     });
+
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        this.mainPage = event.url === '/';
+      });
   }
 
   logout(): void {

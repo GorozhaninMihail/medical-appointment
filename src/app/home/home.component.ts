@@ -41,7 +41,7 @@ export class HomeComponent implements OnInit {
         (clinic1, clinic2) => clinic2.doctors.length - clinic1.doctors.length,
       );
 
-      this.doctors = doctors;
+      this.doctors = doctors.filter(({active}) => active);
       this.showAllDoctors();
 
       this.doctors.forEach(({speciality_id, speciality}) => {

@@ -15,12 +15,12 @@ const doctorTimesheetQuery = `SELECT mc_id, date, start
 FROM timesheet
 WHERE doctor_id = $1 AND date >= current_date`;
 
-const SELECT_DOCTOR_TIMESHEET_QUERY = `SELECT timesheet.*, orders.patient_id
+const selectDoctorTimesheetQuery = `SELECT timesheet.*, orders.patient_id
 FROM timesheet
 LEFT JOIN orders ON (orders.mc_id, orders.doctor_id, orders.date, orders.time) = (timesheet.mc_id, timesheet.doctor_id, timesheet.date, timesheet.start)
 WHERE (timesheet.mc_id, timesheet.doctor_id, timesheet.date, timesheet.start) = ($1, $2, $3, $4)`;
 
-/* global sails */
+/* global sails Doctor User */
 
 module.exports = {
   async getAllDoctors() {
@@ -87,10 +87,59 @@ module.exports = {
 
   async getDoctorTime({clinicId, doctorId, date, time}) {
     const doctorOrder = await sails.sendNativeQuery(
-      SELECT_DOCTOR_TIMESHEET_QUERY,
+      selectDoctorTimesheetQuery,
       [clinicId, doctorId, date, time],
     );
 
     return doctorOrder.rows;
+  },
+
+  // "status" param only matters when updating doctor's info.
+  // In this case it must be boolean
+  async addOrChangeDoctor({
+    id,
+    specialityId,
+    experience,
+    information,
+    active = true,
+  }) {
+    const oldDoctorInfo = await Doctor.findOne({
+      id,
+    });
+
+    let updatedDoctor;
+    let statusChanged;
+
+    await sails.transaction(async db => {
+      if (oldDoctorInfo) {
+        if (oldDoctorInfo.status !== active) {
+          statusChanged = true;
+        }
+
+        updatedDoctor = await Doctor
+          .updateOne({id})
+          .set({experience, information, active})
+          .usingConnection(db);
+      } else {
+        statusChanged = true;
+
+        updatedDoctor = await Doctor.create({
+          id,
+          speciality: specialityId,
+          experience,
+          information,
+          active,
+        }).fetch().usingConnection(db);
+      }
+
+      if (statusChanged) {
+        await User
+          .updateOne({id})
+          .set({type: active ? 'doctor' : 'user'})
+          .usingConnection(db);
+      }
+    });
+
+    return updatedDoctor;
   },
 };

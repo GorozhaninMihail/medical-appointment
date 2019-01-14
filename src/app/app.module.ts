@@ -26,6 +26,8 @@ import {AppointmentFormComponent} from './home/appointment-form/appointment-form
 import {ProfileComponent} from './profile/profile.component';
 import {ConsultationFormComponent} from './home/consultation-form/consultation-form.component';
 import { QuestionComponent } from './question/question.component';
+import { UserFioPipe } from './pipes/user-fio.pipe';
+import { TimesheetFormComponent } from './profile/timesheet-form/timesheet-form.component';
 
 @NgModule({
   declarations: [
@@ -37,6 +39,8 @@ import { QuestionComponent } from './question/question.component';
     ProfileComponent,
     ConsultationFormComponent,
     QuestionComponent,
+    UserFioPipe,
+    TimesheetFormComponent,
   ],
   imports: [
     BrowserModule,
@@ -53,6 +57,7 @@ import { QuestionComponent } from './question/question.component';
     ApiService,
     ClinicsService,
     DoctorsService,
+    UserFioPipe,
     {provide: MAT_DATE_LOCALE, useValue: 'ru'},
     {
       provide: HTTP_INTERCEPTORS,
@@ -63,6 +68,7 @@ import { QuestionComponent } from './question/question.component';
   entryComponents: [
     AppointmentFormComponent,
     ConsultationFormComponent,
+    TimesheetFormComponent,
   ],
   bootstrap: [AppComponent],
 })

@@ -9,7 +9,11 @@
       Инновационная сеть клиник, работающая на рынке медицинских услуг Нижнего Новгорода с 2018 года
     </h2>
     <p>
-      <a href="#appointment-form" mat-raised-button color="accent">Записаться на приём</a>
+      <a
+        href="#appointment-form"
+        mat-raised-button
+        color="accent"
+      >Записаться на приём</a>
     </p>
   </div>
 </mat-card>
@@ -60,36 +64,19 @@
         </mat-chip>
       </mat-chip-list>
     </p>
-
-    <span *ngIf="selectedSpeciality">
-      <p>
-        Если вам нужно получить базовую консультацию, наши специалисты готовы помочь вам в режиме онлайн: кратко рассказать о том, что делать дальше и определиться с очной консультацией. Обратите внимание: <b>для постановки диагноза и назначения плана лечения следует записаться на очный прием к специалисту.</b>
-      </p>
-      <p>
-        Чтобы проконсультироваться онлайн по вашему вопросу с любым врачом выбранной специальности, нажмите на кнопку ниже или выберите конкретного врача и общем списке специалистов (справа).
-      </p>
-      <p>
-        <button
-          mat-raised-button
-          color="primary"
-          class="mat-button_action_select"
-          (click)="openConsultationForm(selectedSpeciality)"
-        >
-          Проконсультироваться онлайн (любой врач)
-        </button>
-      </p>
-    </span>
   </section>
 </div>
 
 <div class="container">
-  <section class="section" id="appointment-form">
+  <section
+    class="section"
+    id="appointment-form"
+  >
     <div
-      fxLayout="row"
+      fxLayout="row wrap"
       fxLayoutGap="1rem"
-      class="centers-and-staff"
     >
-      <div>
+      <div fxFlex="calc(50% - 0.5rem)">
         <h2>
           <span
             [matBadge]="clinics.length"
@@ -114,8 +101,10 @@
                   class="mat-button_action_select"
                   (click)="toggleClinic(clinic.id)"
                   [disabled]="!clinic.doctors.length"
+                  [matBadge]="clinic.doctors.length"
+                  [matBadgeHidden]="!clinic.doctors.length"
                 >
-                  {{selectedClinic === clinic.id ? 'Скрыть врачей только из данной клиники' : 'Принимают ' + clinic.doctors.length + ' специалистов'}}
+                  {{selectedClinic === clinic.id ? 'Скрыть врачей данной клиники' : 'Показать врачей данной клиники'}}
                 </button>
               </p>
             </mat-card-content>
@@ -124,7 +113,7 @@
         </div>
       </div>
 
-      <div>
+      <div fxFlex="calc(50% - 0.5rem)" id="doctorList">
         <h2>
           <span
             [matBadge]="visibleDoctors.length"
@@ -141,7 +130,7 @@
         >
           <button
             fxFlexFill
-            mat-stroked-button
+            mat-flat-button
             color="primary"
             (click)="showAllDoctors()"
           >
@@ -203,6 +192,28 @@
             <br>
           </ng-container>
         </div>
+
+        <ng-container *ngIf="selectedSpeciality">
+          <mat-card>
+            <p>
+              Если вам нужно получить базовую консультацию, наши специалисты готовы помочь вам в режиме онлайн: кратко рассказать о том, что делать дальше и определиться с очной консультацией. Обратите внимание: <b>для постановки диагноза и назначения плана лечения следует записаться на очный прием к специалисту.</b>
+            </p>
+            <p>
+              Чтобы проконсультироваться онлайн по вашему вопросу с любым врачом выбранной специальности, нажмите на кнопку ниже или выберите конкретного врача и общем списке специалистов (справа).
+            </p>
+            <p>
+              <button
+                mat-raised-button
+                color="primary"
+                class="mat-button_action_select"
+                (click)="openConsultationForm(selectedSpeciality)"
+              >
+                Онлайн-консультация (любый врач данной специальности)
+              </button>
+            </p>
+          </mat-card>
+          <br>
+        </ng-container>
       </div>
     </div>
   </section>

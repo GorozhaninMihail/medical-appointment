@@ -1,16 +1,16 @@
 import {Component, OnInit} from '@angular/core';
 import {forkJoin} from 'rxjs';
 import {ProfileService} from '../services/profile.service';
-import {IOrder, IUser, IConsultation, IDoctor} from '../models';
+import {IOrder, IUser, IConsultation, IDoctor, ISpeciality, SpecialityId, IClinic} from '../models';
 import {ConsultationService} from '../services/consultation.service';
 import {DoctorsService} from '../services/doctors.service';
 import {flatMap, filter} from 'rxjs/operators';
 import {OrderService} from '../services/order.service';
 import {AdminService} from '../services/admin.service';
-
-enum Tabs {
-  Orders = 0,
-}
+import {ClinicsService} from '../services/clinics.service';
+import {UserFioPipe} from '../pipes/user-fio.pipe';
+import {MatBottomSheet} from '@angular/material';
+import { TimesheetFormComponent } from './timesheet-form/timesheet-form.component';
 
 @Component({
   selector: 'app-profile',
@@ -19,24 +19,44 @@ enum Tabs {
 })
 export class ProfileComponent implements OnInit {
   constructor(
+    private bottomSheet: MatBottomSheet,
     private profileService: ProfileService,
     private consultationService: ConsultationService,
     private doctorService: DoctorsService,
     private orderSerive: OrderService,
     private adminService: AdminService,
+    private clinicsService: ClinicsService,
+    private userFioPipe: UserFioPipe,
   ) {}
 
-  private selectedTab: Tabs = Tabs.Orders;
+  private selectedTab = 0;
   private user: IUser;
 
   private orders: IOrder[];
   private consultations: IConsultation[];
   private doctors: IDoctor[];
-  private stats: any;
+
+  private adminData?: {
+    stats?: any;
+    specialities?: ISpeciality[],
+    clinics?: IClinic[],
+  };
 
   private loaded = false;
+
+  // Form models
+  private doctorToAdd: any = {
+    id: '',
+    specialityId: '',
+    experience: '',
+    information: '',
+    active: true,
+  };
   private specialityName = '';
-  private error = '';
+
+  // Form errors
+  private addDoctorError = '';
+  private addSpecialityError = '';
 
   private displayedColumns = [
     'date',
@@ -52,27 +72,40 @@ export class ProfileComponent implements OnInit {
       flatMap(user => {
         this.user = user;
 
-        let requests = [
+        let requests: any = [
           this.orderSerive.getOrders(),
           this.consultationService.getAll(),
           this.doctorService.getAll(),
         ];
 
         if (user.role === 'admin') {
-          requests.push(this.adminService.getStats());
+          requests.push(
+            this.adminService.getStats(),
+            this.adminService.getAllSpecialities(),
+            this.clinicsService.getAll(),
+          );
         }
+
         return forkJoin(...requests);
       }),
-    ).subscribe(([orders, consultations, doctors, stats]) => {
+    ).subscribe(([orders, consultations, doctors, ...adminData]) => {
       this.orders = orders;
       this.consultations = consultations;
       this.doctors = doctors;
-      this.stats = stats;
+
+      const [stats, specialities, clinics] = adminData;
+
+      this.adminData = {
+        stats,
+        specialities,
+        clinics,
+      };
+
       this.loaded = true;
     });
   }
 
-  setTab(tabIndex: Tabs): void {
+  setTab(tabIndex: number): void {
     this.selectedTab = tabIndex;
   }
 
@@ -96,16 +129,44 @@ export class ProfileComponent implements OnInit {
 
     const speciality = doctorInfo.speciality.toLowerCase();
 
-    let subject: string;
-
-    if (doctor_id) {
-      const {first_name, middle_name, last_name} = doctorInfo;
-      subject = `${last_name} ${first_name[0]}. ${middle_name[0]}. (${speciality})`;
-    } else {
-      subject = `${speciality} (любой врач)`;
-    }
+    const subject = doctor_id
+      ? `${this.userFioPipe.transform(doctorInfo)}. (${speciality})`
+      : `${speciality} (любой врач)`;
 
     return subject;
+  }
+
+  countDoctorsBySpeciality(specialityId: SpecialityId): number {
+    return this.doctors
+      .filter(({speciality_id}) => speciality_id === specialityId)
+      .length;
+  }
+
+  openTimesheetForm(doctor: IDoctor): void {
+    this.bottomSheet.open(TimesheetFormComponent, {
+      data: {
+        doctor,
+        clinics: this.adminData.clinics,
+      },
+    });
+  }
+
+  chooseDoctorForEdit(doctor: IDoctor): void {
+    const {
+      doctor_id: id,
+      speciality_id: specialityId,
+      experience,
+      information,
+      active,
+    } = doctor;
+
+    this.doctorToAdd = {
+      id,
+      specialityId,
+      experience,
+      information,
+      active,
+    };
   }
 
   changeOrderStatus(order: IOrder): void {
@@ -121,13 +182,58 @@ export class ProfileComponent implements OnInit {
     const {specialityName} = this;
 
     this.adminService.addSpeciality(specialityName).subscribe(
-      () => {
+      speciality => {
         this.specialityName = '';
-        this.error = '';
+        this.addSpecialityError = '';
+        this.adminData.specialities.push(speciality);
       },
       ({error}) => {
-        this.error = error;
+        this.addSpecialityError = error;
       },
+    );
+  }
+
+  addOrChangeDoctor(): void {
+    const {
+      id,
+      specialityId,
+      experience,
+      information,
+      active,
+    } = this.doctorToAdd;
+
+    const fixedId = +id;
+    const fixedSpecialityId = +specialityId;
+    const fixedExperience = +experience;
+
+    this.adminService
+      .addOrUpdateDoctor(
+        fixedId,
+        fixedSpecialityId,
+        fixedExperience,
+        information,
+        active,
+      )
+      .subscribe(
+        result => {
+          console.log(result);
+          this.specialityName = '';
+          this.addDoctorError = '';
+        },
+        ({error}) => {
+          console.log(error);
+          this.addDoctorError = error;
+        },
+      );
+  }
+
+  deleteSpeciality(specialityId: SpecialityId): void {
+    this.adminService.deleteSpeciality(specialityId).subscribe(
+      () => {
+        this.adminData.specialities = this.adminData.specialities
+          .filter(({id}) => id !== specialityId);
+      },
+      console.log,
     );
   }
 }

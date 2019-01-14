@@ -55,12 +55,12 @@
       [(ngModel)]="formModel.date"
       #date="ngModel"
       name="date"
-      placeholder="Выберите дату"
+      placeholder="Выберите дату (нажмите на иконку календаря справа)"
       [(min)]="minDate"
       [(max)]="maxDate"
+      [(matDatepickerFilter)]="isDateAppropriate"
       (dateChange)="dateChanged()"
-      [disabled]="!formModel.clinic"
-      (click)="picker.open()"
+      disabled
       required
     >
     <mat-datepicker-toggle
@@ -70,6 +70,7 @@
     <mat-datepicker
       touchUi
       #picker
+      [disabled]="!formModel.clinic"
     ></mat-datepicker>
   </mat-form-field>
   <mat-error *ngIf="date.touched && date.invalid">

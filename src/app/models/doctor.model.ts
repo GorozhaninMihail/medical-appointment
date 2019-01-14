@@ -12,6 +12,7 @@ export interface IDoctor {
   first_name: string;
   middle_name: string;
   last_name: string;
+  active: boolean;
   clinics?: ClinicId[];
   timesheet?: [{
     mc_id: ClinicId;
